@@ -1,7 +1,7 @@
 import { Grid, Typography } from "@mui/material";
 import { AxiosInstance } from "axios";
-import { useEffect, useRef } from "react";
-import { isError, useInfiniteQuery } from "react-query";
+import { useEffect, useMemo, useRef } from "react";
+import { useInfiniteQuery, useQuery } from "react-query";
 
 // Components
 import MovieCard from "./MovieCard";
@@ -9,6 +9,7 @@ import { Loader } from "./MuiCustoms";
 import MovieSkeleton from "./MovieSkeleton";
 
 // Types
+export type GenresList = Record<string, string>
 interface Props {
   api: AxiosInstance;
 }
@@ -20,17 +21,21 @@ export interface Movie {
   original_title: string;
   overview: string;
   popularity: number;
+  vote_average: number;
+  release_date: string;
+}
+export interface Genre {
+  id: number,
+  name: string
 }
 
 const Movies: React.FC<Props> = ({ api }) => {
-  // API Req
+
+  // MoviesAPI Req
   const {
     data,
-    status,
-    error,
     isError,
     isFetching,
-    isFetchingNextPage,
     hasNextPage,
     fetchNextPage,
   } = useInfiniteQuery({
@@ -44,6 +49,26 @@ const Movies: React.FC<Props> = ({ api }) => {
       return lastPage.length !== 0 ? allPages.length : undefined;
     },
   });
+  // GenreListAPI Req
+  const {data: genreList} = useQuery({
+    queryKey: ['genresAPI'],
+    queryFn: async () => {
+      const res = await api.get('/3/genre/movie/list')
+      return res?.data.genres
+    }
+  })
+
+
+  // Genres Table
+  let genresList: GenresList = {}
+  useMemo(()=>{
+    (genreList !== undefined) && genreList.map((item: Genre) => {
+      const idx = (item.id).toString()
+      genresList[idx] = item.name
+    })
+  }, [genreList])
+  console.log(genresList);
+
 
   // Side-Effects
   const loadingTarget = useRef<HTMLInputElement | null>(null);
@@ -57,9 +82,10 @@ const Movies: React.FC<Props> = ({ api }) => {
       observer.observe(loadingTarget?.current);
     }
 
-    console.log(data?.pages);
+    // console.log(data?.pages);
   }, [data, loadingTarget, hasNextPage, fetchNextPage]);
 
+  // API Client Management
   if (isError) return (<Typography>Connect Your VPN, Please.</Typography>)
   if (isFetching) return <MovieSkeleton />;
 
@@ -78,7 +104,7 @@ const Movies: React.FC<Props> = ({ api }) => {
                   key={idx}
                   sx={{ display: "flex", justifyContent: "center" }}
                 >
-                  <MovieCard item={item}></MovieCard>
+                  <MovieCard item={item} genres={genresList}></MovieCard>
                 </Grid>
               );
             });
