@@ -15,6 +15,16 @@ interface ThemeContext {
 interface Props {
   children: ReactNode;
 }
+declare module '@mui/material/styles' {
+  interface BreakpointOverrides {
+      xs: true;
+      sm: true;
+      md: true;
+      lg: true;
+      xl: true;
+      xxl: true;
+  }
+}
 
 // Context
 export const DefaultTheme = createContext<ThemeContext>({
@@ -38,6 +48,7 @@ export const ThemeProvide: React.FC<Props> = ({ children }) => {
   // Initial Theme
   const initialValue = {
     theme: createTheme({
+      breakpoints: {keys: ["xs","sm","md","lg","xl","xxl"], values: {xs: 0, sm: 576, md: 768, lg: 992, xl: 1280, xxl: 1530}},
       palette: {
         mode: darkMode ? "dark" : "light",
         background: {

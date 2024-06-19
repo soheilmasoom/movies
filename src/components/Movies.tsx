@@ -1,15 +1,16 @@
 import { Grid, Typography } from "@mui/material";
 import { AxiosInstance } from "axios";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useInfiniteQuery, useQuery } from "react-query";
 
 // Components
-import MovieCard from "./MovieCard";
 import { Loader } from "./MuiCustoms";
 import MovieSkeleton from "./MovieSkeleton";
+import MoviesList from "./MoviesList";
+import Aside from "./Aside";
 
 // Types
-export type GenresList = Record<string, string>
+export type GenresList = Record<string, string>;
 interface Props {
   api: AxiosInstance;
 }
@@ -24,51 +25,76 @@ export interface Movie {
   vote_average: number;
   release_date: string;
 }
-export interface Genre {
-  id: number,
-  name: string
+export interface ListItem {
+  id: number | string;
+  name: string;
 }
 
 const Movies: React.FC<Props> = ({ api }) => {
+  const [genresList, setGenresList] = useState<GenresList>({});
+  const [countriesList, setCountriesList] = useState<ListItem[]>([]);
+
+  // MoviesAPI Params
+  const [searchParams, setSearchParams] = useState(
+    JSON.parse(localStorage.getItem("filterOptions") as string)
+  );
+  const getFilterOptions = (state: {}) => {
+    setSearchParams(state);
+  };
 
   // MoviesAPI Req
-  const {
-    data,
-    isError,
-    isFetching,
-    hasNextPage,
-    fetchNextPage,
-  } = useInfiniteQuery({
-    queryKey: ["moviesAPI"],
-    queryFn: async ({ pageParam = 1 }) => {
-      const res = await api.get(`/3/trending/movie/day?page=${pageParam}`);
-      return res?.data;
-    },
-    enabled: true,
-    getNextPageParam: (lastPage, allPages) => {
-      return lastPage.length !== 0 ? allPages.length : undefined;
+  const { data, isError, isFetching, hasNextPage, fetchNextPage, refetch } =
+    useInfiniteQuery({
+      queryKey: ["moviesAPI"],
+      queryFn: async ({ pageParam = 1 }) => {
+        const res = await api.get(`/3/discover/movie?page=${pageParam}`, {
+          params: { ...searchParams },
+        });
+        return res?.data;
+      },
+      enabled: true,
+      getNextPageParam: (lastPage, allPages) => {
+        return lastPage.length !== 0 ? allPages.length : undefined;
+      },
+    });
+  // GenreListAPI Req
+  const { data: genreList } = useQuery({
+    queryKey: ["genresAPI"],
+    queryFn: async () => {
+      const res = await api.get("/3/genre/movie/list");
+      return res?.data.genres;
     },
   });
-  // GenreListAPI Req
-  const {data: genreList} = useQuery({
-    queryKey: ['genresAPI'],
+  // CountriesListAPI Req
+  const { data: countries } = useQuery({
+    queryKey: ["countriesAPI"],
     queryFn: async () => {
-      const res = await api.get('/3/genre/movie/list')
-      return res?.data.genres
-    }
-  })
-
+      const res = await api.get("/3/configuration/countries");
+      return res?.data;
+    },
+  });
 
   // Genres Table
-  let genresList: GenresList = {}
-  useMemo(()=>{
-    (genreList !== undefined) && genreList.map((item: Genre) => {
-      const idx = (item.id).toString()
-      genresList[idx] = item.name
-    })
-  }, [genreList])
-  console.log(genresList);
-
+  let genreTemp: GenresList = {};
+  useMemo(() => {
+    genreList !== undefined &&
+      genreList.map((item: ListItem) => {
+        const idx = item.id.toString();
+        genreTemp[idx] = item.name;
+        setGenresList(genreTemp);
+      });
+  }, [genreList]);
+  
+  // Countries Table
+  let countryTemp: ListItem[] = [];
+  useMemo(() => {
+    countries !== undefined &&
+      countries.map((country: any) => {
+        const temp = { id: country.english_name, name: country.english_name };
+        countryTemp.push(temp);
+      });
+    setCountriesList(countryTemp);
+  }, [countries]);
 
   // Side-Effects
   const loadingTarget = useRef<HTMLInputElement | null>(null);
@@ -86,32 +112,25 @@ const Movies: React.FC<Props> = ({ api }) => {
   }, [data, loadingTarget, hasNextPage, fetchNextPage]);
 
   // API Client Management
-  if (isError) return (<Typography>Connect Your VPN, Please.</Typography>)
+  if (isError) return <Typography>Connect Your VPN, Please.</Typography>;
   if (isFetching) return <MovieSkeleton />;
+  
 
   return (
-    <>
-      <Grid container spacing={3}>
-        {data?.pages &&
-          data.pages.map((page) => {
-            return page.results.map((item: Movie, idx: number) => {
-              return (
-                <Grid
-                  item
-                  xs={12}
-                  md={6}
-                  lg={3}
-                  key={idx}
-                  sx={{ display: "flex", justifyContent: "center" }}
-                >
-                  <MovieCard item={item} genres={genresList}></MovieCard>
-                </Grid>
-              );
-            });
-          })}
+    <Grid container spacing={3}>
+      <Grid item component={"aside"} xs={0} lg={2.5}>
+        <Aside
+          refetch={refetch}
+          genreList={genreList}
+          countriesList={countriesList}
+          getFilterOptions={getFilterOptions}
+        />
       </Grid>
-      <Loader ref={loadingTarget} />
-    </>
+      <Grid item component={"section"} xs={12} lg={9.5}>
+        <MoviesList data={data} genresList={genresList} />
+        <Loader ref={loadingTarget} />
+      </Grid>
+    </Grid>
   );
 };
 

@@ -138,3 +138,11 @@ export const GenreLabel = styled(Chip)({
   color: theme.palette.grey[600],
   height: 26,
 })
+
+export const Sidebar = styled(Box)({
+  width: '16rem',
+  // border: `2px solid`,
+  // borderColor: theme.palette.grey[700],
+  // borderRadius: '8px',
+  position: 'fixed',
+})

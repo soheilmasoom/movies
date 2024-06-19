@@ -28,19 +28,7 @@ const MovieCard: React.FC<Props> = ({ item, genres }) => {
   
   // Theme
   const theme = useContext(DefaultTheme)?.theme;
-
-  // Genres Table
-  // type GenresList = Record<string, string>
-  // let genresList: GenresList = {}
-  // useMemo(()=>{
-  //   genres.map(item => {
-  //     const idx = (item.id).toString()
-  //     genresList[idx] = item.name
-  //   })
-  // }, [genres])
-  // console.log(genresList);
   
-
 
   return (
     <MCard sx={{ width: 300 }}>

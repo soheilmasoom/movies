@@ -31,7 +31,7 @@ function App() {
   return (
     <QueryClientProvider client={client}>
         <Navbar></Navbar>
-        <Container component={'main'}>
+        <Container component={'main'} maxWidth={'xxl'}>
           <Movies api={moviesAPI}></Movies>
         </Container>
       </QueryClientProvider>
