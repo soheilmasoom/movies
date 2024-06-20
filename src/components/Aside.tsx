@@ -1,36 +1,25 @@
 import { FormControl, SelectChangeEvent } from "@mui/material";
 import { Sidebar } from "./MuiCustoms";
-import { useReducer } from "react";
+import { memo, useContext, useReducer } from "react";
 import { searchParams, searchParamsReducer } from "../reducer/filterOptions";
-import {
-  InfiniteData,
-  QueryObserverResult,
-  RefetchOptions,
-  RefetchQueryFilters,
-} from "react-query";
 import { ListItem } from "./Movies";
 import FilterItem from "./FilterItem";
+import { CheckParams } from "../context/CheckParams";
 
 interface Props {
-  getFilterOptions: (state: {}) => void;
-  refetch: <TPageData>(
-    options?: (RefetchOptions & RefetchQueryFilters<TPageData>) | undefined
-  ) => Promise<QueryObserverResult<InfiniteData<any>, unknown>>;
   genreList: ListItem[];
   countriesList: ListItem[];
 }
 
 const Aside: React.FC<Props> = ({
-  refetch,
-  getFilterOptions,
   genreList,
-  countriesList,
 }) => {
-  const [filterOptions, dispatch] = useReducer(
+  const params = useContext(CheckParams)
+
+  const [none, dispatch] = useReducer(
     searchParamsReducer,
     searchParams
   );
-  getFilterOptions(filterOptions);
 
   // Filter Method
   const handleChange = (event: SelectChangeEvent) => {
@@ -38,10 +27,8 @@ const Aside: React.FC<Props> = ({
       type: event.target.name,
       payload: event.target.value ? event.target.value.toString() : "",
     });
-    
-    setTimeout(() => {
-      refetch();
-    }, 500);
+
+    params?.changeCheckFilter()
   };
 
   return (
@@ -53,15 +40,15 @@ const Aside: React.FC<Props> = ({
           filterOptionsList={genreList}
         />
       </FormControl>
-      <FormControl fullWidth>
+      {/* <FormControl fullWidth>
         <FilterItem
           name="country"
           handleChange={handleChange}
           filterOptionsList={countriesList}
         />
-      </FormControl>
+      </FormControl> */}
     </Sidebar>
   );
 };
 
-export default Aside;
+export default memo(Aside);

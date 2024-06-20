@@ -9,26 +9,26 @@ import {
   Typography,
   Zoom,
 } from "@mui/material";
-import { useContext, useMemo } from "react";
+import { memo, useContext } from "react";
 import { DefaultTheme } from "../context/Theme";
+import { Theme } from "@emotion/react";
 
 // Components
-import { Genre, Movie, GenresList } from "./Movies";
+import { Movie, GenresList } from "./Movies";
 import { Adult, GenreLabel, MCard, Rate } from "./MuiCustoms";
 
 // Types
 interface Props {
-  item: Movie,
-  genres: GenresList
+  item: Movie;
+  genres: GenresList;
 }
 
 const MovieCard: React.FC<Props> = ({ item, genres }) => {
   const rateValue = item.vote_average;
-  const genreLabels = item.genre_ids.slice(0, 2)
-  
+  const genreLabels = item.genre_ids.slice(0, 2);
+
   // Theme
-  const theme = useContext(DefaultTheme)?.theme;
-  
+  const theme: Theme = useContext(DefaultTheme)?.theme;
 
   return (
     <MCard sx={{ width: 300 }}>
@@ -52,12 +52,22 @@ const MovieCard: React.FC<Props> = ({ item, genres }) => {
             placement="top"
             arrow
           >
-            <Typography gutterBottom variant="h6" component="div" sx={{marginBottom: 1}}>
+            <Typography
+              gutterBottom
+              variant="h6"
+              component="div"
+              sx={{ marginBottom: 1 }}
+            >
               {item.original_title.slice(0, 20) + "..."}
             </Typography>
           </Tooltip>
         ) : (
-          <Typography gutterBottom variant="h6" component="div" sx={{marginBottom: 1}}>
+          <Typography
+            gutterBottom
+            variant="h6"
+            component="div"
+            sx={{ marginBottom: 1 }}
+          >
             {item.original_title}
           </Typography>
         )}
@@ -66,15 +76,21 @@ const MovieCard: React.FC<Props> = ({ item, genres }) => {
             gutterBottom
             variant="body2"
             color={theme?.palette.grey[700]}
-            sx={{marginBottom: 0.75}}
+            sx={{ marginBottom: 0.75 }}
           >
             Release: {item.release_date}
           </Typography>
         </Box>
         <Box sx={{ display: "flex", gap: 1.5 }}>
           {genreLabels.map((genre, idx) => {
-            const genreIdx = genre.toString()
-            return <GenreLabel label={genres[genreIdx]} variant="outlined" key={idx}></GenreLabel>
+            const genreIdx = genre.toString();
+            return (
+              <GenreLabel
+                label={genres[genreIdx]}
+                variant="outlined"
+                key={idx}
+              ></GenreLabel>
+            );
           })}
         </Box>
       </CardContent>
@@ -90,4 +106,4 @@ const MovieCard: React.FC<Props> = ({ item, genres }) => {
   );
 };
 
-export default MovieCard;
+export default memo(MovieCard);
