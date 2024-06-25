@@ -1,12 +1,12 @@
-import { Grid } from "@mui/material";
-import { AxiosInstance } from "axios";
 import { useMemo, useState } from "react";
 import { useQuery } from "react-query";
+import { AxiosInstance } from "axios";
+import { Grid } from "@mui/material";
+import { CheckParamsProvider } from "../context/CheckParams";
 
 // Components
 import MoviesList from "./MoviesList";
 import Aside from "./Aside";
-import { CheckParamsProvider } from "../context/CheckParams";
 
 // Types
 export type GenresList = Record<string, string>;
@@ -49,6 +49,7 @@ const Movies: React.FC<Props> = ({ api }) => {
       return res?.data;
     },
   });
+  
 
   // Genres Table
   let genreTemp: GenresList = {};

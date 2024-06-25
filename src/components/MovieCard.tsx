@@ -1,3 +1,6 @@
+import { memo, useContext } from "react";
+import { Theme } from "@emotion/react";
+import { DefaultTheme } from "../context/Theme";
 import {
   Box,
   Button,
@@ -9,9 +12,6 @@ import {
   Typography,
   Zoom,
 } from "@mui/material";
-import { memo, useContext } from "react";
-import { DefaultTheme } from "../context/Theme";
-import { Theme } from "@emotion/react";
 
 // Components
 import { Movie, GenresList } from "./Movies";
@@ -33,7 +33,11 @@ const MovieCard: React.FC<Props> = ({ item, genres }) => {
   return (
     <MCard sx={{ width: 300 }}>
       <CardActionArea disableRipple>
+
+        {/* Adults Chip */}
         {item.adult && <Adult label={"+18"}></Adult>}
+
+        {/* Card Image */}
         <CardMedia
           component="img"
           image={
@@ -42,9 +46,14 @@ const MovieCard: React.FC<Props> = ({ item, genres }) => {
           }
           alt={item.original_title}
         />
+
+        {/* Movie Rate */}
         <Rate value={rateValue * 10} />
       </CardActionArea>
+
       <CardContent sx={{ position: "relative" }}>
+
+        {/* Movie Title */}
         {item.original_title.length > 22 ? (
           <Tooltip
             title={item.original_title}
@@ -71,6 +80,8 @@ const MovieCard: React.FC<Props> = ({ item, genres }) => {
             {item.original_title}
           </Typography>
         )}
+
+        {/* Movie Release Date */}
         <Box sx={{ display: "flex", justifyContent: "space-between" }}>
           <Typography
             gutterBottom
@@ -81,6 +92,8 @@ const MovieCard: React.FC<Props> = ({ item, genres }) => {
             Release: {item.release_date}
           </Typography>
         </Box>
+
+        {/* Movie Genres */}
         <Box sx={{ display: "flex", gap: 1.5 }}>
           {genreLabels.map((genre, idx) => {
             const genreIdx = genre.toString();
@@ -93,7 +106,10 @@ const MovieCard: React.FC<Props> = ({ item, genres }) => {
             );
           })}
         </Box>
+
       </CardContent>
+
+      {/* Card Footer */}
       <CardActions>
         <Button size="small" color="primary">
           Watch Later
@@ -102,6 +118,7 @@ const MovieCard: React.FC<Props> = ({ item, genres }) => {
           Add to Fav
         </Button>
       </CardActions>
+      
     </MCard>
   );
 };

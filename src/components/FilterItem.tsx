@@ -1,12 +1,12 @@
+import { memo } from "react";
 import { InputLabel, MenuItem, Select, SelectChangeEvent } from "@mui/material";
 import { ListItem } from "./Movies";
-import { memo } from "react";
 
 // Types
 interface Props {
   handleChange: (event: SelectChangeEvent) => void;
   name: string;
-  filterOptionsList: any;
+  filterOptionsList: ListItem[];
 }
 
 const FilterItem: React.FC<Props> = ({
@@ -14,8 +14,11 @@ const FilterItem: React.FC<Props> = ({
   filterOptionsList,
   handleChange,
 }) => {
-  const searchParams = JSON.parse(localStorage.getItem("filterOptions") as string);
+  const searchParams = JSON.parse(
+    localStorage.getItem("filterOptions") as string
+  );
 
+  // Reader of Values from searchParams
   const filterReader = (filterName: string) => {
     switch (filterName) {
       case "genre":
@@ -23,6 +26,9 @@ const FilterItem: React.FC<Props> = ({
 
       case "country":
         return searchParams?.with_origin_country;
+
+      case "sort":
+        return searchParams?.sort_by;
 
       default:
         return;
@@ -35,6 +41,7 @@ const FilterItem: React.FC<Props> = ({
         {name[0].toUpperCase() + name.slice(1)}
       </InputLabel>
       <Select
+        sx={{ borderRadius: "0.5rem" }}
         labelId="filter-label"
         id="filter-option"
         value={searchParams ? filterReader(name) : ""}
@@ -42,7 +49,7 @@ const FilterItem: React.FC<Props> = ({
         name={name}
         onChange={handleChange}
       >
-        <MenuItem value={undefined}>All Items</MenuItem>
+        <MenuItem value={undefined}>- All Items -</MenuItem>
         {filterOptionsList?.map((item: ListItem, idx: number) => {
           return (
             <MenuItem value={item.id} key={idx}>

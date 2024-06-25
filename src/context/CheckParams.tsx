@@ -1,4 +1,4 @@
-import React, { ReactNode, createContext, useState } from "react";
+import { ReactNode, createContext, useState } from "react";
 
 // Types
 interface Props {
@@ -9,11 +9,13 @@ interface Search {
     changeCheckFilter: () => void
 }
 
+// Context
 export const CheckParams = createContext<Search>({
     checkFilter: "",
     changeCheckFilter: () => {}
 })
 
+// Context Provider
 export const CheckParamsProvider: React.FC<Props> = ({children}) => {
     const [checkFilter, setCheckFilter] = useState<string>("off")
 

@@ -1,7 +1,7 @@
-import { useContext, useEffect, useRef } from "react";
-import { Grid, Typography } from "@mui/material";
+import { useContext, useEffect, useMemo, useRef } from "react";
 import { useInfiniteQuery } from "react-query";
 import { AxiosInstance } from "axios";
+import { Grid } from "@mui/material";
 import { CheckParams } from "../context/CheckParams";
 import { GenresList, Movie } from "./Movies";
 
@@ -9,6 +9,7 @@ import { GenresList, Movie } from "./Movies";
 import MovieCard from "./MovieCard";
 import MovieSkeleton from "./MovieSkeleton";
 import { Loader } from "./MuiCustoms";
+import MovieError from "./MovieError";
 
 // Types
 interface Props {
@@ -18,17 +19,24 @@ interface Props {
 
 const MoviesList: React.FC<Props> = ({ api, genresList }) => {
   const params = useContext(CheckParams);
-  const searchParams = JSON.parse(
-    localStorage.getItem("filterOptions") as string
-  );
+  const searchParams = useMemo(() => {
+    return localStorage.getItem("filterOptions")
+      ? JSON.parse(localStorage.getItem("filterOptions") as string)
+      : {};
+  }, [params]);
 
+  
   // MoviesAPI Req
   const { data, isError, isFetching, hasNextPage, fetchNextPage, refetch } =
     useInfiniteQuery({
       queryKey: ["moviesAPI"],
       queryFn: async ({ pageParam = 1 }) => {
         const res = await api.get(`/3/discover/movie?page=${pageParam}`, {
-          params: { ...searchParams },
+          params: {
+            ...searchParams,
+            "vote_average.gte": Number(searchParams["vote_average.gte"]) / 10,
+            "vote_average.lte": Number(searchParams["vote_average.lte"]) / 10,
+          },
         });
         return res?.data;
       },
@@ -41,8 +49,8 @@ const MoviesList: React.FC<Props> = ({ api, genresList }) => {
   // API Refetch
   useEffect(() => {
     if (params?.checkFilter === "on") {
-      params.changeCheckFilter();
       refetch();
+      params.changeCheckFilter();
     }
   }, [params?.checkFilter]);
 
@@ -60,8 +68,10 @@ const MoviesList: React.FC<Props> = ({ api, genresList }) => {
   }, [data, loadingTarget, hasNextPage, fetchNextPage]);
 
   // // API Client Management
-  if (isError) return <Typography>Connect Your VPN, Please.</Typography>;
+  if (isError) return <MovieError error={"Error! Please Try Later"} />;
   if (isFetching) return <MovieSkeleton />;
+  if (data?.pages && data?.pages[0].results.length === 0)
+    return <MovieError error={"There Are No Movies"} />;
 
   return (
     <>
@@ -85,7 +95,11 @@ const MoviesList: React.FC<Props> = ({ api, genresList }) => {
             });
           })}
       </Grid>
-      <Loader ref={loadingTarget} />
+
+      <Loader
+        ref={loadingTarget}
+        sx={{ display: data?.pages[0].results.length > 0 ? "block" : "none" }}
+      />
     </>
   );
 };

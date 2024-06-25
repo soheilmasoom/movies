@@ -1,10 +1,10 @@
+import { ReactNode, createContext, useState } from "react";
 import { Theme } from "@emotion/react";
 import {
   CssBaseline,
   ThemeProvider,
   createTheme,
 } from "@mui/material";
-import { ReactNode, createContext, useState } from "react";
 
 // Types
 type Mode = string;
