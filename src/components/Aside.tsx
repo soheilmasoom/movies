@@ -9,6 +9,7 @@ import {
 import { Theme } from "@emotion/react";
 import { filterOptions, filterOptionsReducer } from "../reducer/filterOptions";
 import { CheckParams } from "../context/CheckParams";
+import { FilterData } from "../context/MoviesData";
 import { ListItem } from "./Movies";
 
 // Components
@@ -16,12 +17,6 @@ import FilterItem from "./FilterItem";
 import DateFilterItem from "./DateFilterItem";
 import RateFilterItem from "./RateFilterItem";
 import { Accord, OptionsDivider, Sidebar } from "./MuiCustoms";
-
-// Types
-interface Props {
-  genreList: ListItem[];
-  countriesList: ListItem[];
-}
 
 // Sort List
 const sortList: ListItem[] = [
@@ -35,12 +30,13 @@ const sortList: ListItem[] = [
   { id: "average_vote.desc", name: "Vote Rate Descending" },
 ];
 
-const Aside: React.FC<Props> = ({ genreList, countriesList }) => {
+const Aside = () => {
   const params = useContext(CheckParams);
   const [reducerState, dispatch] = useReducer(
     filterOptionsReducer,
     filterOptions
   );
+  const filterData = useContext(FilterData)
 
   // Filter Method
   const handleChange = (event: SelectChangeEvent) => {
@@ -51,12 +47,9 @@ const Aside: React.FC<Props> = ({ genreList, countriesList }) => {
     params?.changeCheckFilter();
   };
 
-  // Mediaquery
-  const lg = useMediaQuery((theme: Theme) => theme?.breakpoints.up("lg"));
-
   return (
     <Sidebar
-      sx={{ display: lg ? "flex" : "none", flexDirection: "column", gap: 2 }}
+      sx={{ display: "flex", flexDirection: "column", gap: 2 }}
     >
       <Divider textAlign="left" sx={{ fontSize: "1.5rem" }}>
         Filter Movies
@@ -76,7 +69,7 @@ const Aside: React.FC<Props> = ({ genreList, countriesList }) => {
         <FilterItem
           name="genre"
           handleChange={handleChange}
-          filterOptionsList={genreList}
+          filterOptionsList={filterData.genreList}
         />
       </FormControl>
 
@@ -88,7 +81,7 @@ const Aside: React.FC<Props> = ({ genreList, countriesList }) => {
           <FilterItem
             name="country"
             handleChange={handleChange}
-            filterOptionsList={countriesList}
+            filterOptionsList={filterData.countriesList}
           />
         </FormControl>
 

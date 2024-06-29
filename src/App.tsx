@@ -1,13 +1,15 @@
-import { Container } from "@mui/material";
-import { QueryClient, QueryClientProvider } from "react-query";
+import { useState } from "react";
 import axios from "axios";
+import { QueryClient, QueryClientProvider } from "react-query";
+import { Container } from "@mui/material";
+import { FilterDataProvider } from "./context/MoviesData";
 
 // Components
 import Navbar from "./components/Navbar";
 import Movies from "./components/Movies";
 
 // HTTP Req Configuration
-const moviesAPI = axios.create({
+export const moviesAPI = axios.create({
   baseURL: "https://api.themoviedb.org",
   params: {
     api_key: "78ab21f3a9e954c04f73cb439d32a5a8",
@@ -21,22 +23,36 @@ const client = new QueryClient({
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: false,
-    }
-  }
+    },
+  },
 });
 
-
 function App() {
+  const [isNavScrolled, setIsNavScrolled] = useState<boolean>(false);
+
+  // Nav Scroll Check
+  document.addEventListener("scroll", () => {
+    if (window.pageYOffset > 60) {
+      setIsNavScrolled(true);
+    } else {
+      setIsNavScrolled(false);
+    }
+  });
 
   return (
     <QueryClientProvider client={client}>
-        <Navbar></Navbar>
-        <Container component={'main'} maxWidth={'xxl'}>
-          <Movies api={moviesAPI}></Movies>
+      <FilterDataProvider>
+        <Navbar isNavScrolled={isNavScrolled} />
+        <Container
+          component={"main"}
+          maxWidth={"xxl"}
+          sx={{ marginTop: "1rem" }}
+        >
+          <Movies isNavScrolled={isNavScrolled}></Movies>
         </Container>
-      </QueryClientProvider>
+      </FilterDataProvider>
+    </QueryClientProvider>
   );
 }
 
 export default App;
-

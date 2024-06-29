@@ -1,10 +1,6 @@
 import { ReactNode, createContext, useState } from "react";
 import { Theme } from "@emotion/react";
-import {
-  CssBaseline,
-  ThemeProvider,
-  createTheme,
-} from "@mui/material";
+import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
 
 // Types
 type Mode = string;
@@ -15,14 +11,14 @@ interface ThemeContext {
 interface Props {
   children: ReactNode;
 }
-declare module '@mui/material/styles' {
+declare module "@mui/material/styles" {
   interface BreakpointOverrides {
-      xs: true;
-      sm: true;
-      md: true;
-      lg: true;
-      xl: true;
-      xxl: true;
+    xs: true;
+    sm: true;
+    md: true;
+    lg: true;
+    xl: true;
+    xxl: true;
   }
 }
 
@@ -34,7 +30,6 @@ export const DefaultTheme = createContext<ThemeContext>({
 
 // Context Provider
 export const ThemeProvide: React.FC<Props> = ({ children }) => {
-
   // DarkMode Management
   const darkMode = JSON.parse(
     localStorage.getItem("theme") as string
@@ -45,16 +40,23 @@ export const ThemeProvide: React.FC<Props> = ({ children }) => {
     setMode(bool ? "dark" : "light");
   };
 
+  // Default Theme
+  const defaultTheme = createTheme()
+
   // Initial Theme
   const initialValue = {
     theme: createTheme({
-      breakpoints: {keys: ["xs","sm","md","lg","xl","xxl"], values: {xs: 0, sm: 576, md: 768, lg: 992, xl: 1280, xxl: 1530}},
+      ...defaultTheme,
+      breakpoints: {
+        keys: ["xs", "sm", "md", "lg", "xl", "xxl"],
+        values: { xs: 0, sm: 480, md: 768, lg: 992, xl: 1280, xxl: 1530 },
+      },
       palette: {
         mode: darkMode ? "dark" : "light",
         background: {
-          default: darkMode ? '#121212' : '#b8bdb5',
-          paper: darkMode ? '#1f1f1f' : '#e0e2db'
-        }
+          default: darkMode ? "#121212" : "#b8bdb5",
+          paper: darkMode ? "#1f1f1f" : "#e0e2db",
+        },
       },
       components: {
         MuiCheckbox: {
@@ -65,7 +67,6 @@ export const ThemeProvide: React.FC<Props> = ({ children }) => {
         },
         MuiCssBaseline: {
           styleOverrides: {
-            
             // Scrollbar Customize
             html: {
               scrollBehavior: "smooth",

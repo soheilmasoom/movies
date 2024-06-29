@@ -1,17 +1,17 @@
-import { useMemo, useState } from "react";
-import { useQuery } from "react-query";
-import { AxiosInstance } from "axios";
-import { Grid } from "@mui/material";
+import { useContext, useMemo, useState } from "react";
+import { Grid, useMediaQuery } from "@mui/material";
 import { CheckParamsProvider } from "../context/CheckParams";
+import { FilterData } from "../context/MoviesData";
 
 // Components
 import MoviesList from "./MoviesList";
 import Aside from "./Aside";
+import SearchMovie from "./SearchMovie";
 
 // Types
 export type GenresList = Record<string, string>;
 interface Props {
-  api: AxiosInstance;
+  isNavScrolled: boolean
 }
 export interface Movie {
   adult: boolean;
@@ -29,27 +29,12 @@ export interface ListItem {
   name: string;
 }
 
-const Movies: React.FC<Props> = ({ api }) => {
-  const [genresList, setGenresList] = useState<GenresList>({});
-  const [countriesList, setCountriesList] = useState<ListItem[]>([]);
+const Movies: React.FC<Props> = ({ isNavScrolled }) => {
+  const [genresTable, setGenresTable] = useState<GenresList>({});
+  const genreList = useContext(FilterData).genreList
 
-  // GenreListAPI Req
-  const { data: genreList } = useQuery({
-    queryKey: ["genresAPI"],
-    queryFn: async () => {
-      const res = await api.get("/3/genre/movie/list");
-      return res?.data.genres;
-    },
-  });
-  // CountriesListAPI Req
-  const { data: countries } = useQuery({
-    queryKey: ["countriesAPI"],
-    queryFn: async () => {
-      const res = await api.get("/3/configuration/countries");
-      return res?.data;
-    },
-  });
-  
+  // Breakpoints
+  const lg = useMediaQuery("(min-width:992px)");
 
   // Genres Table
   let genreTemp: GenresList = {};
@@ -58,29 +43,18 @@ const Movies: React.FC<Props> = ({ api }) => {
       genreList.map((item: ListItem) => {
         const idx = item.id.toString();
         genreTemp[idx] = item.name;
-        setGenresList(genreTemp);
+        setGenresTable(genreTemp);
       });
   }, [genreList]);
 
-  // Countries Table
-  let countryTemp: ListItem[] = [];
-  useMemo(() => {
-    countries !== undefined &&
-      countries.map((country: any) => {
-        const temp = { id: country.english_name, name: country.english_name };
-        countryTemp.push(temp);
-      });
-    setCountriesList(countryTemp);
-  }, [countries]);
-
   return (
     <CheckParamsProvider>
-      <Grid container spacing={3}>
+      <Grid container spacing={3} sx={isNavScrolled ? {marginTop: "50px"} : {}}>
         <Grid item component={"aside"} xs={0} lg={2.5}>
-          <Aside genreList={genreList} countriesList={countriesList} />
+          {lg && <Aside />}
         </Grid>
         <Grid item component={"section"} xs={12} lg={9.5}>
-          <MoviesList api={api} genresList={genresList} />
+          <MoviesList genresTable={genresTable} />
         </Grid>
       </Grid>
     </CheckParamsProvider>

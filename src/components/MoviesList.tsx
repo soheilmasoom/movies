@@ -1,9 +1,9 @@
 import { useContext, useEffect, useMemo, useRef } from "react";
 import { useInfiniteQuery } from "react-query";
-import { AxiosInstance } from "axios";
 import { Grid } from "@mui/material";
 import { CheckParams } from "../context/CheckParams";
 import { GenresList, Movie } from "./Movies";
+import { moviesAPI } from "../App";
 
 // Components
 import MovieCard from "./MovieCard";
@@ -13,11 +13,10 @@ import MovieError from "./MovieError";
 
 // Types
 interface Props {
-  genresList: GenresList;
-  api: AxiosInstance;
+  genresTable: GenresList;
 }
 
-const MoviesList: React.FC<Props> = ({ api, genresList }) => {
+const MoviesList: React.FC<Props> = ({ genresTable }) => {
   const params = useContext(CheckParams);
   const searchParams = useMemo(() => {
     return localStorage.getItem("filterOptions")
@@ -31,7 +30,7 @@ const MoviesList: React.FC<Props> = ({ api, genresList }) => {
     useInfiniteQuery({
       queryKey: ["moviesAPI"],
       queryFn: async ({ pageParam = 1 }) => {
-        const res = await api.get(`/3/discover/movie?page=${pageParam}`, {
+        const res = await moviesAPI.get(`/3/discover/movie?page=${pageParam}`, {
           params: {
             ...searchParams,
             "vote_average.gte": Number(searchParams["vote_average.gte"]) / 10,
@@ -41,6 +40,7 @@ const MoviesList: React.FC<Props> = ({ api, genresList }) => {
         return res?.data;
       },
       enabled: true,
+      keepPreviousData: true,
       getNextPageParam: (lastPage, allPages) => {
         return lastPage.length !== 0 ? allPages.length : undefined;
       },
@@ -89,7 +89,7 @@ const MoviesList: React.FC<Props> = ({ api, genresList }) => {
                   key={idx}
                   sx={{ display: "flex", justifyContent: "center" }}
                 >
-                  <MovieCard item={item} genres={genresList}></MovieCard>
+                  <MovieCard item={item} genres={genresTable}></MovieCard>
                 </Grid>
               );
             });
