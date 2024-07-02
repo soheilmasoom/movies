@@ -1,6 +1,5 @@
 import { useContext, useMemo, useState } from "react";
 import { Grid, useMediaQuery } from "@mui/material";
-import { CheckParamsProvider } from "../context/CheckParams";
 import { FilterData } from "../context/MoviesData";
 
 // Components
@@ -46,8 +45,7 @@ const Movies: React.FC<Props> = ({ isNavScrolled }) => {
       });
   }, [genreList]);
 
-  return (
-    <CheckParamsProvider>
+  return ( 
       <Grid container spacing={3} sx={isNavScrolled ? {marginTop: "50px"} : {}}>
         <Grid item component={"aside"} xs={0} lg={2.5}>
           {lg && <Aside />}
@@ -56,7 +54,6 @@ const Movies: React.FC<Props> = ({ isNavScrolled }) => {
           <MoviesList genresTable={genresTable} />
         </Grid>
       </Grid>
-    </CheckParamsProvider>
   );
 };
 

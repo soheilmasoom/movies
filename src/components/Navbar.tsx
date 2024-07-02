@@ -42,8 +42,12 @@ const Navbar: React.FC<Props> = ({ isNavScrolled }) => {
     width: "100%",
     background: (theme.theme as CustomTheme)?.palette.background.default,
     borderBottom: `1px solid ${(theme.theme as CustomTheme)?.palette.divider}`,
-    boxShadow: `0 10px 10px ${(theme.theme as CustomTheme)?.palette.background.default},
-     0 5px 5px ${(theme.theme as CustomTheme)?.palette.background.default} !important`,
+    boxShadow: `0 10px 10px ${
+      (theme.theme as CustomTheme)?.palette.background.default
+    },
+     0 5px 5px ${
+       (theme.theme as CustomTheme)?.palette.background.default
+     } !important`,
     transition: "position 0.2s ease, background 0.2s ease",
   };
 

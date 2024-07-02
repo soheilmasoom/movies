@@ -1,7 +1,7 @@
 import { useContext, useEffect, useMemo, useRef } from "react";
 import { useInfiniteQuery } from "react-query";
 import { Grid } from "@mui/material";
-import { CheckParams } from "../context/CheckParams";
+import { CheckParams, CheckParamsType } from "../context/CheckParams";
 import { GenresList, Movie } from "./Movies";
 import { moviesAPI } from "../App";
 
@@ -17,14 +17,13 @@ interface Props {
 }
 
 const MoviesList: React.FC<Props> = ({ genresTable }) => {
-  const params = useContext(CheckParams);
+  const params = useContext<CheckParamsType>(CheckParams);
   const searchParams = useMemo(() => {
     return localStorage.getItem("filterOptions")
       ? JSON.parse(localStorage.getItem("filterOptions") as string)
       : {};
   }, [params]);
 
-  
   // MoviesAPI Req
   const { data, isError, isFetching, hasNextPage, fetchNextPage, refetch } =
     useInfiniteQuery({

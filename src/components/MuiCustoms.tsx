@@ -57,10 +57,12 @@ export const SearchMovieOptions: React.FC<SearchMovieOptionsProps> = ({
     position: "absolute",
     zIndex: "1005",
     width: "inherit",
+    maxWidth: "442px",
     height: "auto",
     maxHeight: "20rem",
     borderRadius: "1.5rem",
     marginTop: "0.125rem",
+    marginRight: "1rem",
     padding: "0.75rem",
   });
   

@@ -7,6 +7,7 @@ import { FilterDataProvider } from "./context/MoviesData";
 // Components
 import Navbar from "./components/Navbar";
 import Movies from "./components/Movies";
+import { CheckParamsProvider } from "./context/CheckParams";
 
 // HTTP Req Configuration
 export const moviesAPI = axios.create({
@@ -42,14 +43,16 @@ function App() {
   return (
     <QueryClientProvider client={client}>
       <FilterDataProvider>
-        <Navbar isNavScrolled={isNavScrolled} />
-        <Container
-          component={"main"}
-          maxWidth={"xxl"}
-          sx={{ marginTop: "1rem" }}
-        >
-          <Movies isNavScrolled={isNavScrolled}></Movies>
-        </Container>
+        <CheckParamsProvider>
+          <Navbar isNavScrolled={isNavScrolled} />
+          <Container
+            component={"main"}
+            maxWidth={"xxl"}
+            sx={{ marginTop: "1rem" }}
+          >
+            <Movies isNavScrolled={isNavScrolled}></Movies>
+          </Container>
+        </CheckParamsProvider>
       </FilterDataProvider>
     </QueryClientProvider>
   );
