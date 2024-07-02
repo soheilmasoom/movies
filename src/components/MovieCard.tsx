@@ -1,6 +1,5 @@
 import { memo, useContext } from "react";
-import { Theme } from "@emotion/react";
-import { DefaultTheme } from "../context/Theme";
+import { CustomTheme, DefaultTheme, ThemeContext } from "../context/Theme";
 import {
   Box,
   Button,
@@ -28,7 +27,7 @@ const MovieCard: React.FC<Props> = ({ item, genres }) => {
   const genreLabels = item.genre_ids.slice(0, 2);
 
   // Theme
-  const theme: Theme = useContext(DefaultTheme)?.theme;
+  const defaultTheme = useContext<ThemeContext>(DefaultTheme).theme as CustomTheme;
 
   return (
     <MCard sx={{ width: 300 }}>
@@ -86,7 +85,7 @@ const MovieCard: React.FC<Props> = ({ item, genres }) => {
           <Typography
             gutterBottom
             variant="body2"
-            color={theme?.palette.grey[700]}
+            color={defaultTheme?.palette.grey[700]}
             sx={{ marginBottom: 0.75 }}
           >
             Release: {item.release_date}

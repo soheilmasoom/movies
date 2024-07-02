@@ -4,6 +4,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { Typography } from "@mui/material";
 import { Action } from "../reducer/filterOptions";
 import { DateBox } from "./MuiCustoms";
+import { Dayjs } from "dayjs";
 
 // Types
 interface Props {
@@ -12,14 +13,14 @@ interface Props {
 }
 
 const DateFilterItem:React.FC<Props> = ({dispatch, direction}) => {
-    const [value, setValue] = useState()
+    const [_, setValue] = useState<Dayjs>()
 
     return ( <DateBox>
         <Typography>{direction}:</Typography>
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <DatePicker
-            onChange={(newValue: any) => {
-              setValue(newValue);
+            onChange={(newValue: Dayjs|null) => {
+              setValue(newValue as Dayjs);
               dispatch({
                 type: `date_${direction}`,
                 payload: newValue,

@@ -1,32 +1,37 @@
 import { ReactNode, createContext, useState } from "react";
 
 // Types
-interface Props {
-    children: ReactNode
+type CheckFilter = "on" | "off" | "";
+interface CheckParamsProviderProps {
+  children: ReactNode;
 }
-interface Search {
-    checkFilter: string,
-    changeCheckFilter: () => void
+export interface CheckParamsType {
+  checkFilter: CheckFilter;
+  changeCheckFilter: () => void;
 }
 
 // Context
-export const CheckParams = createContext<Search>({
-    checkFilter: "",
-    changeCheckFilter: () => {}
-})
+export const CheckParams = createContext<CheckParamsType>({
+  checkFilter: "",
+  changeCheckFilter: () => {},
+});
 
 // Context Provider
-export const CheckParamsProvider: React.FC<Props> = ({children}) => {
-    const [checkFilter, setCheckFilter] = useState<string>("off")
+export const CheckParamsProvider: React.FC<CheckParamsProviderProps> = ({
+  children,
+}) => {
+  const [checkFilter, setCheckFilter] = useState<CheckFilter>("off");
 
-    const changeCheckFilter = () => {
-        setCheckFilter(checkFilter === "on" ? "off" : "on")
-    }
+  const changeCheckFilter = () => {
+    setCheckFilter(checkFilter === "on" ? "off" : "on");
+  };
 
-    const initial = {
-        checkFilter,
-        changeCheckFilter
-    }
+  const initial: CheckParamsType = {
+    checkFilter,
+    changeCheckFilter,
+  };
 
-    return <CheckParams.Provider value={initial}>{children}</CheckParams.Provider>
-}
+  return (
+    <CheckParams.Provider value={initial}>{children}</CheckParams.Provider>
+  );
+};

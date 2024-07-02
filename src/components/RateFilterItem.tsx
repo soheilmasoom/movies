@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { memo, useState } from "react";
 import { Action, State } from "../reducer/filterOptions";
 import { MuiSlider } from "./MuiCustoms";
 
@@ -7,9 +7,12 @@ interface Props {
   dispatch: (value: Action) => void;
   reducerState: State;
 }
+interface SliderEventTarget extends EventTarget {
+  value: [number, number]
+}
 
 const RateFilterItem: React.FC<Props> = ({ dispatch, reducerState }) => {
-  const [vote, setVote] = useState([
+  const [vote, setVote] = useState<[number, number]>([
     reducerState["vote_average.gte"]
       ? Number(reducerState["vote_average.gte"])
       : 0,
@@ -23,17 +26,17 @@ const RateFilterItem: React.FC<Props> = ({ dispatch, reducerState }) => {
       valueLabelDisplay="auto"
       aria-label="rate slider"
       value={vote}
-      onChange={(event) => {
-        setVote(event.target?.value);
+      onChange={({target}) => {
+        setVote((target as SliderEventTarget)?.value);                
       }}
       onMouseUp={() => {
         dispatch({
           type: "vote",
           payload: vote
         });
-      }}
+      }} 
     ></MuiSlider>
   );
 };
 
-export default RateFilterItem;
+export default memo(RateFilterItem);

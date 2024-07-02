@@ -1,6 +1,6 @@
-import React, { ReactNode, SyntheticEvent, memo, useContext, useState } from "react";
+import React, { ReactNode, SyntheticEvent, useContext, useState } from "react";
 import { MdExpandLess, MdExpandMore } from "react-icons/md";
-import { DefaultTheme } from "../context/Theme";
+import { CustomTheme, DefaultTheme, ThemeContext } from "../context/Theme";
 import {
   Accordion,
   AccordionDetails,
@@ -9,7 +9,6 @@ import {
   AccordionSummary,
   AccordionSummaryProps,
   Box,
-  Button,
   Card,
   Chip,
   CircularProgress,
@@ -18,8 +17,6 @@ import {
   Divider,
   ListItem,
   ListItemText,
-  Palette,
-  Paper,
   Slider,
   Typography,
   createTheme,
@@ -53,10 +50,10 @@ export const SearchMovieOptions: React.FC<SearchMovieOptionsProps> = ({
   show,
   data,
 }) => {
-  const defaultTheme = useContext(DefaultTheme);
+  const defaultTheme = useContext<ThemeContext>(DefaultTheme).theme as CustomTheme;
 
   const OptionsList = styled(Collapse)({
-    background: defaultTheme.theme.palette.background.paper,
+    background: defaultTheme.palette.background.paper,
     position: "absolute",
     zIndex: "1005",
     width: "inherit",
@@ -129,7 +126,7 @@ export const MCard = styled(Card)({
 });
 
 export const Rate = (props: CircularProgressProps & { value: number }) => {
-  const rateTheme = useContext(DefaultTheme)?.theme;
+  const defaultTheme = useContext<ThemeContext>(DefaultTheme).theme as CustomTheme;
   const darkMode = JSON.parse(
     localStorage.getItem("theme") as string
   )?.darkMode;
@@ -150,8 +147,8 @@ export const Rate = (props: CircularProgressProps & { value: number }) => {
           position: "relative",
           display: "inline-flex",
           backgroundColor:
-            (rateTheme.palette as Palette) && darkMode
-              ? rateTheme?.palette.background.default
+            (defaultTheme?.palette) && darkMode
+              ? defaultTheme?.palette.background.default
               : "#fff",
           borderRadius: "50%",
         }}
@@ -201,7 +198,6 @@ export const Adult = styled(Chip)({
   position: "absolute",
   top: 0,
   right: 0,
-  // transform: "translate(0, 50%)",
   zIndex: 1,
   padding: 0,
   height: "auto",
@@ -221,11 +217,11 @@ export const GenreLabel = styled(Chip)({
 
 // Aside Components
 export const Accord: React.FC<AccProps> = ({ title, children }) => {
-  const defaultTheme = useContext(DefaultTheme)?.theme;
+  const defaultTheme = useContext<ThemeContext>(DefaultTheme).theme as CustomTheme;
   const [expanded, setExpanded] = useState<string | false>(false);
 
   const handleExpand =
-    (panel: string) => (event: SyntheticEvent, newExpanded: boolean) => {
+    (panel: string) => (_: SyntheticEvent, newExpanded: boolean) => {
       setExpanded(newExpanded ? panel : false);
     };
 
@@ -275,8 +271,6 @@ export const Accord: React.FC<AccProps> = ({ title, children }) => {
     flexDirection: "column",
     gap: 15,
     padding: theme.spacing(2),
-    // width: '95%',
-    // margin: '0 auto'
   });
 
   return (
@@ -296,9 +290,6 @@ export const Accord: React.FC<AccProps> = ({ title, children }) => {
 export const Sidebar = styled(Box)({
   width: "100%",
   height: "90vh",
-  // border: `2px solid`,
-  // borderColor: theme.palette.grey[700],
-  // borderRadius: '8px',
 });
 
 export const OptionsDivider = styled(Divider)({
@@ -313,9 +304,10 @@ export const DateBox = styled(Box)({
   display: "flex",
   justifyContent: "space-between",
   alignItems: "center",
+  gap: 5,
   ".MuiInputBase-root": {
     height: "2.5rem",
-    width: "10rem",
+    maxWidth: "160px",
     "& input, input::placeholder": {
       fontSize: "0.8rem",
     },

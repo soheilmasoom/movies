@@ -4,12 +4,10 @@ import {
   Divider,
   FormControl,
   SelectChangeEvent,
-  useMediaQuery,
 } from "@mui/material";
-import { Theme } from "@emotion/react";
 import { filterOptions, filterOptionsReducer } from "../reducer/filterOptions";
-import { CheckParams } from "../context/CheckParams";
-import { FilterData } from "../context/MoviesData";
+import { CheckParams, CheckParamsType } from "../context/CheckParams";
+import { FilterData, FilterDataType } from "../context/MoviesData";
 import { ListItem } from "./Movies";
 
 // Components
@@ -31,12 +29,12 @@ const sortList: ListItem[] = [
 ];
 
 const Aside = () => {
-  const params = useContext(CheckParams);
+  const params = useContext<CheckParamsType>(CheckParams);
   const [reducerState, dispatch] = useReducer(
     filterOptionsReducer,
     filterOptions
   );
-  const filterData = useContext(FilterData)
+  const filterData = useContext<FilterDataType>(FilterData)
 
   // Filter Method
   const handleChange = (event: SelectChangeEvent) => {

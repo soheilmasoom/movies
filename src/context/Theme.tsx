@@ -3,9 +3,21 @@ import { Theme } from "@emotion/react";
 import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
 
 // Types
-type Mode = string;
-interface ThemeContext {
-  theme: Theme;
+type Mode = "dark" | "light";
+export interface CustomTheme extends Theme {
+  palette: {
+    mode: Mode,
+    background: {
+      default: string,
+      paper: string,
+    },
+    divider: string,
+    shadows: string[],
+    grey: Record<number, string>
+  }
+}
+export interface ThemeContext {
+  theme: CustomTheme | {};
   checkMode: (bool: boolean) => void;
 }
 interface Props {
@@ -34,17 +46,18 @@ export const ThemeProvide: React.FC<Props> = ({ children }) => {
   const darkMode = JSON.parse(
     localStorage.getItem("theme") as string
   )?.darkMode;
-  const [mode, setMode] = useState<Mode>(darkMode);
+  const [_, setMode] = useState<Mode>(darkMode);
 
   const checkMode = (bool: boolean) => {
     setMode(bool ? "dark" : "light");
   };
 
   // Default Theme
-  const defaultTheme = createTheme()
+  const defaultTheme: Theme = createTheme()
+  
 
   // Initial Theme
-  const initialValue = {
+  const initialValue: ThemeContext = {
     theme: createTheme({
       ...defaultTheme,
       breakpoints: {
@@ -62,7 +75,7 @@ export const ThemeProvide: React.FC<Props> = ({ children }) => {
         MuiCheckbox: {
           defaultProps: {
             disableRipple: true,
-            size: "1.75rem",
+            size: "large",
           },
         },
         MuiCssBaseline: {

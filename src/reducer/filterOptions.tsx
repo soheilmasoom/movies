@@ -37,7 +37,7 @@ export const filterOptions: State = {
 
 // Reducer Function
 export const filterOptionsReducer = (state: State, action: Action): State => {
-  const filters = JSON.parse(localStorage.getItem("filterOptions") as string);
+  const filters: State = JSON.parse(localStorage.getItem("filterOptions") as string);
 
   switch (action.type) {
     case ACTION_TYPE.GENRE:
@@ -67,12 +67,12 @@ export const filterOptionsReducer = (state: State, action: Action): State => {
     case ACTION_TYPE.DATE_TO:
       return { ...filters, "primary_release_date.lte": action.payload };
 
-      case ACTION_TYPE.VOTE:
-        return {
-          ...filters,
-          "vote_average.gte": action.payload[0],
-          "vote_average.lte": action.payload[1],
-        }
+    case ACTION_TYPE.VOTE:
+      return {
+        ...filters,
+        "vote_average.gte": action.payload[0],
+        "vote_average.lte": action.payload[1],
+      };
 
     default:
       return { ...state };

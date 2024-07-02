@@ -4,15 +4,21 @@ import { useQuery } from "react-query";
 import { moviesAPI } from "../App";
 
 // Types
+export interface FilterDataType {
+  genreList: ListItem[],
+  countriesList: ListItem[],
+}
 interface FilterDataProviderProps {
   children: ReactNode;
 }
 
-export const FilterData = createContext({
+// Context
+export const FilterData = createContext<FilterDataType>({
   genreList: [],
   countriesList: [],
 });
 
+// Context Provider
 export const FilterDataProvider: React.FC<FilterDataProviderProps> = ({children}) => {
   // GenreListAPI Req
   const { data: genreList } = useQuery({
@@ -43,7 +49,7 @@ export const FilterDataProvider: React.FC<FilterDataProviderProps> = ({children}
     // setCountriesList(countryTemp);
   }, [countries]);
 
-  const initial = {
+  const initial: FilterDataType = {
     genreList,
     countriesList,
   }

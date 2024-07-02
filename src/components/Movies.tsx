@@ -6,7 +6,6 @@ import { FilterData } from "../context/MoviesData";
 // Components
 import MoviesList from "./MoviesList";
 import Aside from "./Aside";
-import SearchMovie from "./SearchMovie";
 
 // Types
 export type GenresList = Record<string, string>;
@@ -31,7 +30,7 @@ export interface ListItem {
 
 const Movies: React.FC<Props> = ({ isNavScrolled }) => {
   const [genresTable, setGenresTable] = useState<GenresList>({});
-  const genreList = useContext(FilterData).genreList
+  const genreList: ListItem[] = useContext(FilterData).genreList
 
   // Breakpoints
   const lg = useMediaQuery("(min-width:992px)");

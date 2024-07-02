@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { memo, useContext, useState } from "react";
 import {
   Box,
   Button,
@@ -10,7 +10,7 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import { BsList, BsSunFill, BsX } from "react-icons/bs";
-import { DefaultTheme } from "../context/Theme";
+import { CustomTheme, DefaultTheme, ThemeContext } from "../context/Theme";
 
 // Components
 import { Nav } from "./MuiCustoms";
@@ -26,7 +26,7 @@ const Navbar: React.FC<Props> = ({ isNavScrolled }) => {
   const [drawer, toggleDrawer] = useState<boolean>(false);
 
   // Context Data
-  const theme = useContext(DefaultTheme);
+  const theme = useContext<ThemeContext>(DefaultTheme);
 
   // Breakpoints
   const sm = useMediaQuery("(min-width:480px)");
@@ -40,10 +40,10 @@ const Navbar: React.FC<Props> = ({ isNavScrolled }) => {
     position: "fixed",
     zIndex: "1009",
     width: "100%",
-    background: theme.theme?.palette.background.default,
-    borderBottom: `1px solid ${theme.theme?.palette.divider}`,
-    boxShadow: `0 10px 10px ${theme.theme.palette.background.default},
-     0 5px 5px ${theme.theme.palette.background.default} !important`,
+    background: (theme.theme as CustomTheme)?.palette.background.default,
+    borderBottom: `1px solid ${(theme.theme as CustomTheme)?.palette.divider}`,
+    boxShadow: `0 10px 10px ${(theme.theme as CustomTheme)?.palette.background.default},
+     0 5px 5px ${(theme.theme as CustomTheme)?.palette.background.default} !important`,
     transition: "position 0.2s ease, background 0.2s ease",
   };
 
@@ -181,4 +181,4 @@ const Navbar: React.FC<Props> = ({ isNavScrolled }) => {
   );
 };
 
-export default Navbar;
+export default memo(Navbar);
