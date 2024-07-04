@@ -1,5 +1,5 @@
 import { ReactNode, createContext, useMemo } from "react";
-import { ListItem } from "../components/Movies";
+import { ListItem } from "../pages/Movies";
 import { useQuery } from "react-query";
 import { moviesAPI } from "../App";
 

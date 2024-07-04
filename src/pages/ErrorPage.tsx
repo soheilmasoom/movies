@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Box, Typography } from "@mui/material";
 
 // Types
@@ -5,7 +6,7 @@ interface Props {
   error: string;
 }
 
-const MovieError: React.FC<Props> = ({ error }) => {
+const ErrorPage: React.FC<Props> = ({ error }) => {
   return (
     <Box
       sx={{
@@ -21,4 +22,4 @@ const MovieError: React.FC<Props> = ({ error }) => {
   );
 };
 
-export default MovieError;
+export default memo(ErrorPage);

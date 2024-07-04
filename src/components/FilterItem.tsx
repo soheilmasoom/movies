@@ -1,6 +1,6 @@
 import { memo } from "react";
 import { InputLabel, MenuItem, Select, SelectChangeEvent } from "@mui/material";
-import { ListItem } from "./Movies";
+import { ListItem } from "../pages/Movies";
 
 // Types
 interface Props {

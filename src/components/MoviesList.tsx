@@ -2,14 +2,14 @@ import { useContext, useEffect, useMemo, useRef } from "react";
 import { useInfiniteQuery } from "react-query";
 import { Grid } from "@mui/material";
 import { CheckParams, CheckParamsType } from "../context/CheckParams";
-import { GenresList, Movie } from "./Movies";
+import { GenresList, Movie } from "../pages/Movies";
 import { moviesAPI } from "../App";
 
 // Components
 import MovieCard from "./MovieCard";
 import MovieSkeleton from "./MovieSkeleton";
 import { Loader } from "./MuiCustoms";
-import MovieError from "./MovieError";
+import ErrorPage from "../pages/ErrorPage";
 
 // Types
 interface Props {
@@ -67,10 +67,10 @@ const MoviesList: React.FC<Props> = ({ genresTable }) => {
   }, [data, loadingTarget, hasNextPage, fetchNextPage]);
 
   // // API Client Management
-  if (isError) return <MovieError error={"Error! Please Try Later"} />;
+  if (isError) return <ErrorPage error={"Error! Please Try Later"} />;
   if (isFetching) return <MovieSkeleton />;
   if (data?.pages && data?.pages[0].results.length === 0)
-    return <MovieError error={"There Are No Movies"} />;
+    return <ErrorPage error={"There Are No Movies"} />;
 
   return (
     <>

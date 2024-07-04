@@ -8,7 +8,7 @@ import {
 import { filterOptions, filterOptionsReducer } from "../reducer/filterOptions";
 import { CheckParams, CheckParamsType } from "../context/CheckParams";
 import { FilterData, FilterDataType } from "../context/MoviesData";
-import { ListItem } from "./Movies";
+import { ListItem } from "../pages/Movies";
 
 // Components
 import FilterItem from "./FilterItem";
@@ -17,9 +17,9 @@ import RateFilterItem from "./RateFilterItem";
 import { Accord, OptionsDivider, Sidebar } from "./MuiCustoms";
 
 // Sort List
-const sortList: ListItem[] = [
-  { id: "original_title.asc", name: "Titles Ascending" },
-  { id: "original_title.desc", name: "Titles Descending" },
+export const sortList: ListItem[] = [
+  { id: "original_title.asc", name: "Title Ascending" },
+  { id: "original_title.desc", name: "Title Descending" },
   { id: "popularity.asc", name: "Popularity Ascending" },
   { id: "popularity.desc", name: "Popularity Descending" },
   { id: "primary_release_date.asc", name: "Release Ascending" },

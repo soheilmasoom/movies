@@ -4,7 +4,7 @@ import { OutlinedInput, styled } from "@mui/material";
 import { BsSearch } from "react-icons/bs";
 
 // Components
-import { Movie } from "./Movies";
+import { Movie } from "../pages/Movies";
 import { SearchMovieOptions } from "./MuiCustoms";
 
 interface Props {

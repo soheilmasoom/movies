@@ -6,7 +6,6 @@ import {
   Divider,
   Drawer,
   IconButton,
-  Typography,
   useMediaQuery,
 } from "@mui/material";
 import { BsList, BsSunFill, BsX } from "react-icons/bs";
@@ -16,6 +15,7 @@ import { CustomTheme, DefaultTheme, ThemeContext } from "../context/Theme";
 import { Nav } from "./MuiCustoms";
 import SearchMovie from "./SearchMovie";
 import Aside from "./Aside";
+import { useNavigate } from "react-router-dom";
 
 // Types
 interface Props {
@@ -24,6 +24,7 @@ interface Props {
 
 const Navbar: React.FC<Props> = ({ isNavScrolled }) => {
   const [drawer, toggleDrawer] = useState<boolean>(false);
+  const navigate = useNavigate()
 
   // Context Data
   const theme = useContext<ThemeContext>(DefaultTheme);
@@ -54,12 +55,25 @@ const Navbar: React.FC<Props> = ({ isNavScrolled }) => {
   // Mui Props
   const label = { inputProps: { "aria-label": "Darkmode Checkbox" } };
 
+  // console.log();
+
   return (
     <>
       {/* Header */}
       <Nav sx={!isNavScrolled ? {} : { ...styles }}>
         {/* Webpage Title */}
-        <Typography variant="h4">Movies</Typography>
+        <Button
+          disableRipple
+          sx={{
+            fontSize: "1.75rem",
+            fontWeight: 700,
+            background: "none !important",
+            color: (theme.theme as CustomTheme).palette.text.primary,
+          }}
+          onClick={()=>navigate("/")}
+        >
+          Movies
+        </Button>
 
         {/* Search Box */}
         {md && <SearchMovie width="22rem" />}

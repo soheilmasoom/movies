@@ -1,13 +1,18 @@
 import { useState } from "react";
 import axios from "axios";
 import { QueryClient, QueryClientProvider } from "react-query";
+import { Navigate, Route, Routes } from "react-router-dom";
 import { Container } from "@mui/material";
 import { FilterDataProvider } from "./context/MoviesData";
+import { CheckParamsProvider } from "./context/CheckParams";
+import "./main.css";
 
 // Components
 import Navbar from "./components/Navbar";
-import Movies from "./components/Movies";
-import { CheckParamsProvider } from "./context/CheckParams";
+import Home from "./pages/Home";
+import Movies from "./pages/Movies";
+import Info from "./pages/Info";
+import ErrorPage from "./pages/ErrorPage";
 
 // HTTP Req Configuration
 export const moviesAPI = axios.create({
@@ -19,6 +24,7 @@ export const moviesAPI = axios.create({
     Authorization:
       "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI3OGFiMjFmM2E5ZTk1NGMwNGY3M2NiNDM5ZDMyYTVhOCIsInN1YiI6IjY2NWRkNzI3MzdlNmYzNjhkYzc5OTNmZiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.47csLb-ojIZN_riaBfO2f45rNP_XGhqEIn9PWbg9VFg",
   },
+  // timeout: 5000,
 });
 const client = new QueryClient({
   defaultOptions: {
@@ -50,7 +56,25 @@ function App() {
             maxWidth={"xxl"}
             sx={{ marginTop: "1rem" }}
           >
-            <Movies isNavScrolled={isNavScrolled}></Movies>
+            <Routes>
+              <Route
+                path="/"
+                element={<Home isNavScrolled={isNavScrolled} />}
+              />
+              <Route
+                path="/movies"
+                element={<Movies isNavScrolled={isNavScrolled} />}
+              />
+              <Route
+                path="/movies/:id"
+                element={<Info isNavScrolled={isNavScrolled} />}
+              />
+              <Route
+                path="/not-found"
+                element={<ErrorPage error="404 Error: Page Not Found" />}
+              />
+              <Route path="*" element={<Navigate to="/not-found" />} />
+            </Routes>
           </Container>
         </CheckParamsProvider>
       </FilterDataProvider>

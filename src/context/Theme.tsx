@@ -13,7 +13,8 @@ export interface CustomTheme extends Theme {
     },
     divider: string,
     shadows: string[],
-    grey: Record<number, string>
+    grey: Record<number, string>,
+    text: Record<string, string>,
   }
 }
 export interface ThemeContext {

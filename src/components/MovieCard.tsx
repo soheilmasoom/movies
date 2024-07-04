@@ -1,4 +1,5 @@
 import { memo, useContext } from "react";
+import { useNavigate } from "react-router-dom";
 import { CustomTheme, DefaultTheme, ThemeContext } from "../context/Theme";
 import {
   Box,
@@ -13,7 +14,7 @@ import {
 } from "@mui/material";
 
 // Components
-import { Movie, GenresList } from "./Movies";
+import { Movie, GenresList } from "../pages/Movies";
 import { Adult, GenreLabel, MCard, Rate } from "./MuiCustoms";
 
 // Types
@@ -27,12 +28,18 @@ const MovieCard: React.FC<Props> = ({ item, genres }) => {
   const genreLabels = item.genre_ids.slice(0, 2);
 
   // Theme
-  const defaultTheme = useContext<ThemeContext>(DefaultTheme).theme as CustomTheme;
+  const defaultTheme = useContext<ThemeContext>(DefaultTheme)
+    .theme as CustomTheme;
+
+  // Redirection
+  const navigate = useNavigate();
+  const handleClick = (id: number) => {
+    navigate(`/movies/${id}`);
+  };
 
   return (
     <MCard sx={{ width: 300 }}>
-      <CardActionArea disableRipple>
-
+      <CardActionArea disableRipple onClick={() => handleClick(item.id)}>
         {/* Adults Chip */}
         {item.adult && <Adult label={"+18"}></Adult>}
 
@@ -47,11 +54,10 @@ const MovieCard: React.FC<Props> = ({ item, genres }) => {
         />
 
         {/* Movie Rate */}
-        <Rate value={rateValue * 10} />
+        <Rate value={rateValue * 10} position="absolute" />
       </CardActionArea>
 
       <CardContent sx={{ position: "relative" }}>
-
         {/* Movie Title */}
         {item.original_title.length > 22 ? (
           <Tooltip
@@ -105,7 +111,6 @@ const MovieCard: React.FC<Props> = ({ item, genres }) => {
             );
           })}
         </Box>
-
       </CardContent>
 
       {/* Card Footer */}
@@ -117,7 +122,6 @@ const MovieCard: React.FC<Props> = ({ item, genres }) => {
           Add to Fav
         </Button>
       </CardActions>
-      
     </MCard>
   );
 };

@@ -9,22 +9,43 @@ import {
   AccordionSummary,
   AccordionSummaryProps,
   Box,
+  Button,
   Card,
+  CardContent,
+  CardMedia,
   Chip,
   CircularProgress,
   CircularProgressProps,
   Collapse,
   Divider,
+  Grid,
   ListItem,
   ListItemText,
   Slider,
   Typography,
   createTheme,
   styled,
+  useMediaQuery,
 } from "@mui/material";
-import { Movie } from "./Movies";
+import { Movie } from "../pages/Movies";
+import { commaSeperate } from "../main";
 
 // Types
+interface SectionProps {
+  backgroundColor?: string;
+  paddingX?: boolean;
+  children: ReactNode;
+}
+interface ArticleBoxProps {
+  title: string;
+  xs: number;
+  sm?: number;
+  md?: number;
+  lg?: number;
+  xl?: number;
+  xxl?: number;
+  children: ReactNode;
+}
 interface AccProps {
   title: string;
   children: ReactNode;
@@ -33,24 +54,101 @@ interface SearchMovieOptionsProps {
   show: boolean;
   data: Movie[];
 }
+interface CastCardProps {
+  item: any;
+}
 
 // Theme
 const theme = createTheme();
 
+//General Components
+export const Section: React.FC<SectionProps> = ({
+  paddingX = false,
+  backgroundColor,
+  children,
+}) => {
+  return (
+    <Box
+      sx={{
+        backgroundColor,
+        width: "100%",
+        height: "auto",
+        paddingTop: "2rem",
+        paddingRight: paddingX ? "2rem" : "0",
+        paddingBottom: "2rem",
+        paddingLeft: paddingX ? "2rem" : "0",
+      }}
+    >
+      <Grid container sx={{ gap: 5 }}>
+        {children}
+      </Grid>
+    </Box>
+  );
+};
+
+export const ArticleBox: React.FC<ArticleBoxProps> = ({
+  title,
+  xs,
+  sm,
+  md,
+  lg,
+  xl,
+  xxl,
+  children,
+}) => {
+  const defaultTheme = useContext<ThemeContext>(DefaultTheme)
+    .theme as CustomTheme;
+
+  return (
+    <Grid
+      item
+      xs={xs}
+      sm={sm}
+      md={md}
+      lg={lg}
+      xl={xl}
+      xxl={xxl}
+      sx={{
+        position: "relative",
+        border: `1px solid ${defaultTheme.palette.divider}`,
+        borderRadius: "0.5rem",
+        padding: "0.5rem",
+        paddingTop: "1.5rem",
+      }}
+    >
+      <Typography
+        variant="h5"
+        sx={{
+          background: defaultTheme.palette.background.default,
+          paddingX: 1,
+          position: "absolute",
+          top: -18,
+          left: 40,
+        }}
+      >
+        {title}
+      </Typography>
+
+      {children}
+    </Grid>
+  );
+};
+
 // Navbar Components
-export const Nav = styled('nav')({
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  padding: '0 1.5rem',
-  height: '3.5rem'
-})
+export const Nav = styled("nav")({
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  padding: "0 1.5rem",
+  height: "3.5rem",
+});
 
 export const SearchMovieOptions: React.FC<SearchMovieOptionsProps> = ({
   show,
   data,
 }) => {
-  const defaultTheme = useContext<ThemeContext>(DefaultTheme).theme as CustomTheme;
+  const defaultTheme = useContext<ThemeContext>(DefaultTheme)
+    .theme as CustomTheme;
 
   const OptionsList = styled(Collapse)({
     background: defaultTheme.palette.background.paper,
@@ -65,11 +163,10 @@ export const SearchMovieOptions: React.FC<SearchMovieOptionsProps> = ({
     marginRight: "1rem",
     padding: "0.75rem",
   });
-  
 
   return (
     <OptionsList in={show}>
-      {(data && data.length === 0) && <Typography>Movie Not Found</Typography>}
+      {data && data.length === 0 && <Typography>Movie Not Found</Typography>}
       {data &&
         data.slice(0, 3).map((item) => {
           return (
@@ -86,7 +183,7 @@ export const SearchMovieOptions: React.FC<SearchMovieOptionsProps> = ({
                 secondary={`Release: ${item.release_date}`}
               ></ListItemText>
             </ListItem>
-          );        
+          );
         })}
     </OptionsList>
   );
@@ -127,20 +224,24 @@ export const MCard = styled(Card)({
   },
 });
 
-export const Rate = (props: CircularProgressProps & { value: number }) => {
-  const defaultTheme = useContext<ThemeContext>(DefaultTheme).theme as CustomTheme;
+export const Rate = (
+  props: CircularProgressProps & { value: number; position: string }
+) => {
+  const defaultTheme = useContext<ThemeContext>(DefaultTheme)
+    .theme as CustomTheme;
   const darkMode = JSON.parse(
     localStorage.getItem("theme") as string
   )?.darkMode;
+  const position = props.position;
 
   return (
     <Box
       component={"span"}
       sx={{
-        position: "absolute",
+        position,
         bottom: 0,
-        right: 15,
-        transform: "translate(0, 50%)",
+        right: position === "absolute" ? 15 : 0,
+        transform: position === "absolute" ? "translate(0, 50%)" : "none",
         zIndex: 1,
       }}
     >
@@ -149,7 +250,7 @@ export const Rate = (props: CircularProgressProps & { value: number }) => {
           position: "relative",
           display: "inline-flex",
           backgroundColor:
-            (defaultTheme?.palette) && darkMode
+            defaultTheme?.palette && darkMode
               ? defaultTheme?.palette.background.default
               : "#fff",
           borderRadius: "50%",
@@ -219,7 +320,8 @@ export const GenreLabel = styled(Chip)({
 
 // Aside Components
 export const Accord: React.FC<AccProps> = ({ title, children }) => {
-  const defaultTheme = useContext<ThemeContext>(DefaultTheme).theme as CustomTheme;
+  const defaultTheme = useContext<ThemeContext>(DefaultTheme)
+    .theme as CustomTheme;
   const [expanded, setExpanded] = useState<string | false>(false);
 
   const handleExpand =
@@ -356,3 +458,126 @@ export const MuiSlider = styled(Slider)({
   },
 });
 
+// Info Components
+export const CastCard: React.FC<CastCardProps> = ({ item }) => {
+  const sm = useMediaQuery("(min-width:500px)");
+  return (
+    <Card
+      sx={{
+        position: "relative",
+        width: sm ? "12rem" : "8rem",
+        height: sm ? "18rem" : "12rem",
+        borderRadius: "1rem",
+      }}
+    >
+      <CardMedia
+        component={"img"}
+        image={`https://image.tmdb.org/t/p/w600_and_h900_bestv2/${item?.profile_path}`}
+      ></CardMedia>
+      <CardContent
+        sx={{
+          position: "absolute",
+          bottom: 0,
+          width: sm ? "12rem" : "8rem",
+          backgroundColor: theme.palette.grey[900],
+          opacity: 0.8,
+          padding: "1rem 0 !important",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        <Typography fontWeight={700} textAlign={"center"}>
+          {item?.name}
+        </Typography>
+        <Typography variant="subtitle2" textAlign={"center"}>
+          {item?.character}
+        </Typography>
+      </CardContent>
+    </Card>
+  );
+};
+
+export const RecomCard: React.FC<CastCardProps> = ({ item }) => {
+  const sm = useMediaQuery("(min-width:500px)");
+
+  return (
+    <Card
+      sx={{
+        position: "relative",
+        width: sm ? "12rem" : "8rem",
+        height: sm ? "18rem" : "12rem",
+        borderRadius: "1rem",
+      }}
+    >
+      {/* Card Image */}
+      <CardMedia
+        component={"img"}
+        image={`https://image.tmdb.org/t/p/w600_and_h900_bestv2/${item?.poster_path}`}
+      ></CardMedia>
+
+      {/* Card Content */}
+      <CardContent
+        sx={{
+          position: "absolute",
+          bottom: 0,
+          width: sm ? "12rem" : "8rem",
+          height: sm ? "16rem" : "10rem",
+          backgroundColor: theme.palette.grey[900],
+          opacity: 0,
+          padding: "1rem 0 !important",
+          display: "flex",
+          flexDirection: "column",
+          gap: "0.75rem",
+          transition: "opacity 0.2s linear",
+          "&:hover": {
+            opacity: 0.8,
+            transition: "opacity 0.2s linear",
+          },
+        }}
+      >
+        {/* Title */}
+        <Typography
+          variant="h6"
+          fontWeight={700}
+          textAlign={"center"}
+          margin="0.5rem"
+          marginTop={2.5}
+        >
+          {item?.original_title}
+        </Typography>
+
+        {/* Release Date */}
+        <Typography variant="subtitle2" textAlign={"center"}>
+          {item?.release_date.split("-").join("/")}
+        </Typography>
+
+        {/* Popularity */}
+        <Typography variant="subtitle2" textAlign={"center"}>
+          {commaSeperate(Math.floor(item?.popularity * 1000))}
+        </Typography>
+
+        {/* Rate */}
+        <Box sx={{ textAlign: "center" }}>
+          <Chip label={`${Math.floor(item?.vote_average * 10)}%`} />
+        </Box>
+
+        {/* More Button */}
+        <Box
+          sx={{
+            position: "absolute",
+            bottom: "1.5rem",
+            left: "50%",
+            transform: "translate(-50%, 0)",
+          }}
+        >
+          <Button
+            variant="outlined"
+            href={`/movies/${item?.id}`}
+          >
+            More
+          </Button>
+        </Box>
+      </CardContent>
+    </Card>
+  );
+};

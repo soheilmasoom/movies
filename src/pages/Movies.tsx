@@ -3,8 +3,8 @@ import { Grid, useMediaQuery } from "@mui/material";
 import { FilterData } from "../context/MoviesData";
 
 // Components
-import MoviesList from "./MoviesList";
-import Aside from "./Aside";
+import MoviesList from "../components/MoviesList";
+import Aside from "../components/Aside";
 
 // Types
 export type GenresList = Record<string, string>;
