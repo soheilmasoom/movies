@@ -12,6 +12,8 @@ import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import Movies from "./pages/Movies";
 import Info from "./pages/Info";
+import LogIn from "./pages/LogIn";
+import SignUp from "./pages/SignUp";
 import ErrorPage from "./pages/ErrorPage";
 
 // HTTP Req Configuration
@@ -68,6 +70,14 @@ function App() {
               <Route
                 path="/movies/:id"
                 element={<Info isNavScrolled={isNavScrolled} />}
+              />
+              <Route
+                path="/signup"
+                element={<SignUp />}
+              />
+              <Route
+                path="/login"
+                element={<LogIn />}
               />
               <Route
                 path="/not-found"

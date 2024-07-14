@@ -15,7 +15,7 @@ import { CustomTheme, DefaultTheme, ThemeContext } from "../context/Theme";
 import { Nav } from "./MuiCustoms";
 import SearchMovie from "./SearchMovie";
 import Aside from "./Aside";
-import { useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
 // Types
 interface Props {
@@ -82,8 +82,8 @@ const Navbar: React.FC<Props> = ({ isNavScrolled }) => {
         <Box>
           {sm && (
             <>
-              <Button href="#">Login</Button>
-              <Button href="#">Sign Up</Button>
+              <Button onClick={()=>navigate("/login")}>Login</Button>
+              <Button onClick={()=>navigate("/signup")}>Sign Up</Button>
             </>
           )}
           <Checkbox

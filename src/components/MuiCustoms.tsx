@@ -19,6 +19,7 @@ import {
   Collapse,
   Divider,
   Grid,
+  Link,
   ListItem,
   ListItemText,
   Slider,
@@ -581,3 +582,22 @@ export const RecomCard: React.FC<CastCardProps> = ({ item }) => {
     </Card>
   );
 };
+
+// Sign Page Components
+export function Copyright(props: any) {
+  return (
+    <Typography
+      variant="body2"
+      color="text.secondary"
+      align="center"
+      {...props}
+    >
+      {"Copyright © "}
+      <Link color="inherit" href="https://mui.com/">
+        Your Website
+      </Link>{" "}
+      {new Date().getFullYear()}
+      {"."}
+    </Typography>
+  );
+}
