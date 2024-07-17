@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import axios from "axios";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { Navigate, Route, Routes } from "react-router-dom";
@@ -15,6 +15,7 @@ import Info from "./pages/Info";
 import LogIn from "./pages/LogIn";
 import SignUp from "./pages/SignUp";
 import ErrorPage from "./pages/ErrorPage";
+
 
 // HTTP Req Configuration
 export const moviesAPI = axios.create({

@@ -8,6 +8,7 @@ import {
   AccordionProps,
   AccordionSummary,
   AccordionSummaryProps,
+  Avatar,
   Box,
   Button,
   Card,
@@ -21,7 +22,10 @@ import {
   Grid,
   Link,
   ListItem,
+  ListItemIcon,
   ListItemText,
+  Menu,
+  MenuItem,
   Slider,
   Typography,
   createTheme,
@@ -30,6 +34,10 @@ import {
 } from "@mui/material";
 import { Movie } from "../pages/Movies";
 import { commaSeperate } from "../main";
+import { BsCardChecklist, BsHeartFill, BsPersonAdd } from "react-icons/bs";
+import { CiSettings } from "react-icons/ci";
+import { BiSolidLogOut } from "react-icons/bi";
+import { CheckAccount, CheckAccountType } from "../context/CheckAccount";
 
 // Types
 interface SectionProps {
@@ -46,6 +54,12 @@ interface ArticleBoxProps {
   xl?: number;
   xxl?: number;
   children: ReactNode;
+}
+interface AccountMenuProps {
+  accountMenu: null | HTMLElement;
+  setAccountMenu: () => void;
+  open: boolean;
+  username: string;
 }
 interface AccProps {
   title: string;
@@ -187,6 +201,83 @@ export const SearchMovieOptions: React.FC<SearchMovieOptionsProps> = ({
           );
         })}
     </OptionsList>
+  );
+};
+
+export const AccountMenu: React.FC<AccountMenuProps> = ({
+  accountMenu,
+  setAccountMenu,
+  open,
+  username,
+}) => {
+  const { changeIsLogged } = useContext<CheckAccountType>(CheckAccount);
+
+  return (
+    <Menu
+      anchorEl={accountMenu}
+      id="account-menu"
+      open={open}
+      onClose={setAccountMenu}
+      onClick={setAccountMenu}
+      PaperProps={{
+        elevation: 0,
+        sx: {
+          overflow: "visible",
+          filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
+          mt: 1.5,
+          width: "12rem",
+          "& .MuiAvatar-root": {
+            width: 32,
+            height: 32,
+            ml: -0.5,
+            mr: 1,
+          },
+          "&::before": {
+            content: '""',
+            display: "block",
+            position: "absolute",
+            top: 0,
+            right: 14,
+            width: 10,
+            height: 10,
+            bgcolor: "background.paper",
+            transform: "translateY(-50%) rotate(45deg)",
+            zIndex: 0,
+          },
+        },
+      }}
+      transformOrigin={{ horizontal: "right", vertical: "top" }}
+      anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+    >
+      <Typography textAlign="center" marginY="0.5rem">
+        {username}
+      </Typography>
+      <Divider />
+      <MenuItem onClick={setAccountMenu}>
+        <ListItemIcon>
+          <BsCardChecklist />
+        </ListItemIcon>
+        Watchlist
+      </MenuItem>
+      <MenuItem onClick={setAccountMenu}>
+        <ListItemIcon>
+          <BsHeartFill />
+        </ListItemIcon>
+        Favourite
+      </MenuItem>
+      <MenuItem
+        onClick={() => {
+          localStorage.removeItem("session_id");
+          changeIsLogged(false);
+          setAccountMenu();
+        }}
+      >
+        <ListItemIcon>
+          <BiSolidLogOut />
+        </ListItemIcon>
+        Logout
+      </MenuItem>
+    </Menu>
   );
 };
 
@@ -571,10 +662,7 @@ export const RecomCard: React.FC<CastCardProps> = ({ item }) => {
             transform: "translate(-50%, 0)",
           }}
         >
-          <Button
-            variant="outlined"
-            href={`/movies/${item?.id}`}
-          >
+          <Button variant="outlined" href={`/movies/${item?.id}`}>
             More
           </Button>
         </Box>

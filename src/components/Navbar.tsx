@@ -1,21 +1,26 @@
-import { memo, useContext, useState } from "react";
+import { memo, useContext, useMemo, useState } from "react";
 import {
+  Avatar,
   Box,
   Button,
   Checkbox,
   Divider,
   Drawer,
   IconButton,
+  Tooltip,
   useMediaQuery,
 } from "@mui/material";
 import { BsList, BsSunFill, BsX } from "react-icons/bs";
 import { CustomTheme, DefaultTheme, ThemeContext } from "../context/Theme";
 
 // Components
-import { Nav } from "./MuiCustoms";
+import { AccountMenu, Nav } from "./MuiCustoms";
 import SearchMovie from "./SearchMovie";
 import Aside from "./Aside";
 import { NavLink, useNavigate } from "react-router-dom";
+import { moviesAPI } from "../App";
+import { useQuery } from "react-query";
+import { CheckAccount, CheckAccountType } from "../context/CheckAccount";
 
 // Types
 interface Props {
@@ -24,10 +29,14 @@ interface Props {
 
 const Navbar: React.FC<Props> = ({ isNavScrolled }) => {
   const [drawer, toggleDrawer] = useState<boolean>(false);
-  const navigate = useNavigate()
+  const [accountMenu, setAccountMenu] = useState<null | HTMLElement>(null);
+  const toggleAccountMenu = Boolean(accountMenu);
+  const navigate = useNavigate();
 
   // Context Data
   const theme = useContext<ThemeContext>(DefaultTheme);
+  const { isLogged, apiKey } =
+    useContext<CheckAccountType>(CheckAccount);
 
   // Breakpoints
   const sm = useMediaQuery("(min-width:480px)");
@@ -55,7 +64,27 @@ const Navbar: React.FC<Props> = ({ isNavScrolled }) => {
   // Mui Props
   const label = { inputProps: { "aria-label": "Darkmode Checkbox" } };
 
-  // console.log();
+  // isLogged Fn
+  const session = useMemo(() => {
+    return localStorage.getItem("session_id");
+  }, [isLogged]);
+
+  // Account Detail API
+  const { data: accountDetail } = useQuery({
+    queryKey: ["account"],
+    queryFn: async () => {
+      const res = await moviesAPI.get("3/account", {
+        params: {
+          api_key: apiKey,
+          session_id: session,
+        },
+      });
+      return res?.data;
+    },
+    enabled: isLogged,
+  });
+
+  // console.log(accountDetail)
 
   return (
     <>
@@ -70,7 +99,7 @@ const Navbar: React.FC<Props> = ({ isNavScrolled }) => {
             background: "none !important",
             color: (theme.theme as CustomTheme).palette.text.primary,
           }}
-          onClick={()=>navigate("/")}
+          onClick={() => navigate("/")}
         >
           Movies
         </Button>
@@ -79,13 +108,43 @@ const Navbar: React.FC<Props> = ({ isNavScrolled }) => {
         {md && <SearchMovie width="22rem" />}
 
         {/* Nav Buttons */}
-        <Box>
-          {sm && (
+        <Box sx={{ display: "flex", alignItems: "center" }}>
+          {/* Account Setting */}
+          {isLogged && accountDetail && (
+            <Tooltip title="Account settings">
+              <IconButton
+                onClick={(event: React.MouseEvent<HTMLElement>) => {
+                  setAccountMenu(event.currentTarget);
+                }}
+                size="small"
+                sx={{ ml: 2 }}
+                aria-controls={toggleAccountMenu ? "account-menu" : undefined}
+                aria-haspopup="true"
+                aria-expanded={toggleAccountMenu ? "true" : undefined}
+              >
+                <Avatar
+                  src={accountDetail.avatar.tmdb.avatar_path}
+                  sx={{ width: 32, height: 32 }}
+                />
+              </IconButton>
+            </Tooltip>
+          )}
+          <AccountMenu
+            accountMenu={accountMenu}
+            setAccountMenu={()=>setAccountMenu(null)}
+            open={toggleAccountMenu}
+            username={accountDetail && accountDetail.username}
+          />
+
+          {/* Signing Buttons */}
+          {sm && !isLogged && (
             <>
-              <Button onClick={()=>navigate("/login")}>Login</Button>
-              <Button onClick={()=>navigate("/signup")}>Sign Up</Button>
+              <Button onClick={() => navigate("/login")}>Login</Button>
+              <Button onClick={() => navigate("/signup")}>Sign Up</Button>
             </>
           )}
+
+          {/* Theme Toggle */}
           <Checkbox
             {...label}
             checked={
@@ -110,6 +169,8 @@ const Navbar: React.FC<Props> = ({ isNavScrolled }) => {
             }
             sx={{ marginX: 0.5, display: !lg ? "none" : "inline-block" }}
           />
+
+          {/* Nav Menu Toggle */}
           {!lg && (
             <Button>
               <BsList size="1.5rem" onClick={() => toggleDrawer(true)} />
