@@ -12,6 +12,8 @@ import { CustomTheme, DefaultTheme, ThemeContext } from "../context/Theme";
 import { sortList } from "../components/Aside";
 import { ListItem } from "./Movies";
 import { useNavigate } from "react-router-dom";
+import TopSkeleton from "../components/TopSkeleton";
+import ErrorPage from "./ErrorPage";
 
 // Types
 interface Props {
@@ -32,7 +34,7 @@ const Home: React.FC<Props> = ({ isNavScrolled }) => {
     .theme as CustomTheme;
 
   // Top Movies API
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ["TopAPI"],
     queryFn: async () => {
       const res = await moviesAPI.get("/3/movie/popular");
@@ -53,7 +55,8 @@ const Home: React.FC<Props> = ({ isNavScrolled }) => {
     navigate("/movies");
   }
 
-  if (isLoading) return <></>;
+  if (isLoading) return <TopSkeleton />;
+  if (isError) return <ErrorPage error={"Error! Please Try Later"} />;
 
   return (
     <Stack sx={isNavScrolled ? { marginTop: "50px" } : {}}>

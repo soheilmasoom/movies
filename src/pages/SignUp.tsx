@@ -17,12 +17,19 @@ import {
   InputLabel,
   OutlinedInput,
 } from "@mui/material";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+import { CustomTheme, DefaultTheme, ThemeContext } from "../context/Theme";
 
 export default function SignUp() {
   const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [showConfirmPassword, setShowConfirmPassword] =
+    useState<boolean>(false);
+
+  // Theme
+  const defaultTheme = useContext<ThemeContext>(DefaultTheme)
+    .theme as CustomTheme;
 
   // const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
   //   event.preventDefault();
@@ -35,17 +42,19 @@ export default function SignUp() {
 
   // Schema
   const schema = yup.object().shape({
-    firstName: yup.string().required("Firstname is required"),
-    lastName: yup.string().required("Lastname is required"),
-    email: yup
-      .string()
-      .required("Email is required")
-      .email("Email is not valid"),
+    firstName: yup.string().required(),
+    lastName: yup.string().required(),
+    email: yup.string().required().email("Email is not valid"),
     password: yup
       .string()
-      .required("Password is required")
+      .required()
       .min(8, "Password must be in 8-16 characters")
       .max(16, "Password must be in 8-16 characters"),
+    confirmPassword: yup
+      .string()
+      .required()
+      .oneOf([yup.ref("password")], "Password does not match"),
+    allowExtraEmails: yup.boolean().oneOf([true]),
   });
 
   // Hook Form
@@ -57,6 +66,8 @@ export default function SignUp() {
   const submition = (data: any) => {
     console.log(data);
   };
+
+  // console.log(errors.lastName)
 
   return (
     <>
@@ -90,12 +101,14 @@ export default function SignUp() {
                 id="firstName"
                 label="First Name"
                 autoFocus
-                sx={{ marginBottom: "0" }}
+                sx={{
+                  marginBottom: "0",
+                  "& fieldset": {
+                    borderColor: errors?.firstName && "error.main",
+                  },
+                }}
                 {...register("firstName")}
               />
-              <Typography variant="subtitle2" color="error.main">
-                {errors.firstName?.message}
-              </Typography>
             </Grid>
             <Grid item xs={12} sm={6}>
               <TextField
@@ -104,12 +117,14 @@ export default function SignUp() {
                 id="lastName"
                 label="Last Name"
                 autoComplete="family-name"
-                sx={{ marginBottom: "0" }}
+                sx={{
+                  marginBottom: "0",
+                  "& fieldset": {
+                    borderColor: errors?.lastName && "error.main",
+                  },
+                }}
                 {...register("lastName")}
               />
-              <Typography variant="subtitle2" color="error.main">
-                {errors.lastName?.message}
-              </Typography>
             </Grid>
             <Grid item xs={12}>
               <TextField
@@ -118,21 +133,29 @@ export default function SignUp() {
                 id="email"
                 label="Email Address"
                 autoComplete="email"
-                sx={{ marginBottom: "0" }}
+                sx={{
+                  marginBottom: "0",
+                  "& fieldset": {
+                    borderColor: errors?.email && "error.main",
+                  },
+                }}
                 {...register("email")}
               />
               <Typography variant="subtitle2" color="error.main">
-                {errors.email?.message}
+                {errors.email?.message == "Email is not valid" &&
+                  errors.email?.message}
               </Typography>
             </Grid>
             <Grid item xs={12}>
-              <FormControl
-                sx={{ width: "100%"}}
-                variant="outlined"
-              >
+              <FormControl sx={{ width: "100%" }} variant="outlined">
                 <InputLabel htmlFor="password">Password</InputLabel>
                 <OutlinedInput
                   id="password"
+                  sx={{
+                    "& fieldset": {
+                      borderColor: errors?.password && "error.main",
+                    },
+                  }}
                   {...register("password")}
                   type={showPassword ? "text" : "password"}
                   endAdornment={
@@ -149,8 +172,52 @@ export default function SignUp() {
                   }
                   label="Password"
                 />
-                <Typography variant="subtitle2" color="error.main">
+                {/* <Typography variant="subtitle2" color="error.main">
                   {errors.password?.message}
+                </Typography> */}
+              </FormControl>
+            </Grid>
+
+            <Grid item xs={12}>
+              <FormControl sx={{ width: "100%" }} variant="outlined">
+                <InputLabel htmlFor="confirm-password">
+                  Confirm Password
+                </InputLabel>
+                <OutlinedInput
+                  id="confirm-password"
+                  sx={{
+                    "& fieldset": {
+                      borderColor: errors?.confirmPassword && "error.main",
+                    },
+                  }}
+                  {...register("confirmPassword")}
+                  type={showConfirmPassword ? "text" : "password"}
+                  endAdornment={
+                    <InputAdornment position="end">
+                      <IconButton
+                        aria-label="toggle password visibility"
+                        onClick={() =>
+                          setShowConfirmPassword(!showConfirmPassword)
+                        }
+                        onMouseDown={() =>
+                          setShowConfirmPassword(!showConfirmPassword)
+                        }
+                        edge="end"
+                      >
+                        {showConfirmPassword ? (
+                          <BsEyeSlashFill />
+                        ) : (
+                          <BsEyeFill />
+                        )}
+                      </IconButton>
+                    </InputAdornment>
+                  }
+                  label="Confirm Password"
+                />
+                <Typography variant="subtitle2" color="error.main">
+                  {errors.confirmPassword?.message ==
+                    "Password does not match" &&
+                    errors.confirmPassword?.message}
                 </Typography>
               </FormControl>
             </Grid>
@@ -160,10 +227,15 @@ export default function SignUp() {
                   <Checkbox
                     id="allowExtraEmails"
                     color="primary"
-                    // {...register("allowExtraEmails")}
+                    {...register("allowExtraEmails")}
                   />
                 }
                 label="I want to receive inspiration, marketing promotions and updates via email."
+                sx={{
+                  "& .MuiTypography-root, svg": {
+                    color: errors.allowExtraEmails?.message && "error.main",
+                  },
+                }}
               />
             </Grid>
           </Grid>

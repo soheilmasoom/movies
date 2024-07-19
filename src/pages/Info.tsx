@@ -1,4 +1,4 @@
-import React, { useContext, useMemo } from "react";
+import React, { useContext, useEffect, useMemo } from "react";
 import { useLocation } from "react-router-dom";
 import { useQuery } from "react-query";
 import { Box, Stack, useMediaQuery } from "@mui/material";
@@ -16,6 +16,7 @@ import MovieError from "./ErrorPage";
 import InfoCard from "../components/InfoCard";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { CustomTheme, DefaultTheme, ThemeContext } from "../context/Theme";
+import InfoSkeleton from "../components/InfoSkeleton";
 
 // Types
 interface Props {
@@ -23,7 +24,6 @@ interface Props {
 }
 
 const Info: React.FC<Props> = ({ isNavScrolled }) => {
-
   // Page Param
   const param = useLocation();
   const pageParam = useMemo(() => {
@@ -36,6 +36,7 @@ const Info: React.FC<Props> = ({ isNavScrolled }) => {
     data: detailData,
     isError: isErrorDetail,
     isLoading: isLoadingDetail,
+    refetch: refetchDetail,
   } = useQuery({
     queryKey: ["MovieAPI"],
     queryFn: async () => {
@@ -49,6 +50,7 @@ const Info: React.FC<Props> = ({ isNavScrolled }) => {
     data: castData,
     isError: isErrorCast,
     isLoading: isLoadingCast,
+    refetch: refetchCast,
   } = useQuery({
     queryKey: ["CastAPI"],
     queryFn: async () => {
@@ -58,8 +60,9 @@ const Info: React.FC<Props> = ({ isNavScrolled }) => {
   });
   const {
     data: recomData,
-    isLoading,
-    isError,
+    isLoading: isLoadingRecom,
+    isError: isErrorRecom,
+    refetch: refetchRecom,
   } = useQuery({
     queryKey: ["RecomAPI"],
     queryFn: async () => {
@@ -67,6 +70,13 @@ const Info: React.FC<Props> = ({ isNavScrolled }) => {
       return res?.data.results;
     },
   });
+
+  // Movie Refetch
+  useEffect(() => {
+    refetchDetail();
+    refetchCast();
+    refetchRecom();
+  }, [pageParam]);
 
   // Theme
   const defaultTheme = useContext<ThemeContext>(DefaultTheme)
@@ -77,9 +87,8 @@ const Info: React.FC<Props> = ({ isNavScrolled }) => {
   const lg = useMediaQuery("(min-width:992px)");
   const xl = useMediaQuery("(min-width:1280px)");
 
-  if (isLoadingDetail || isLoadingCast) return <Loader />;
-  if (isErrorDetail || isErrorCast)
-    return <MovieError error="Movie Not Found" />;
+  if (isLoadingDetail) return <InfoSkeleton />;
+  if (isErrorDetail) return <MovieError error="Movie Not Found" />;
 
   if (castData && detailData && recomData)
     return (

@@ -10,12 +10,12 @@ import {
 } from "@mui/material";
 import { BsList, BsSunFill, BsX } from "react-icons/bs";
 import { CustomTheme, DefaultTheme, ThemeContext } from "../context/Theme";
+import { useNavigate } from "react-router-dom";
 
 // Components
 import { Nav } from "./MuiCustoms";
 import SearchMovie from "./SearchMovie";
 import Aside from "./Aside";
-import { NavLink, useNavigate } from "react-router-dom";
 
 // Types
 interface Props {

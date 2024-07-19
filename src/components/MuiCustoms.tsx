@@ -30,6 +30,7 @@ import {
 } from "@mui/material";
 import { Movie } from "../pages/Movies";
 import { commaSeperate } from "../main";
+import { useNavigate } from "react-router-dom";
 
 // Types
 interface SectionProps {
@@ -54,6 +55,8 @@ interface AccProps {
 interface SearchMovieOptionsProps {
   show: boolean;
   data: Movie[];
+  isLoading: boolean;
+  handleClose: () => void;
 }
 interface CastCardProps {
   item: any;
@@ -147,7 +150,10 @@ export const Nav = styled("nav")({
 export const SearchMovieOptions: React.FC<SearchMovieOptionsProps> = ({
   show,
   data,
+  isLoading,
+  handleClose,
 }) => {
+  const navigate = useNavigate();
   const defaultTheme = useContext<ThemeContext>(DefaultTheme)
     .theme as CustomTheme;
 
@@ -163,15 +169,30 @@ export const SearchMovieOptions: React.FC<SearchMovieOptionsProps> = ({
     marginTop: "0.125rem",
     marginRight: "1rem",
     padding: "0.75rem",
-  });
+  });  
 
   return (
     <OptionsList in={show}>
-      {data && data.length === 0 && <Typography>Movie Not Found</Typography>}
-      {data &&
+      {isLoading && <Loader />}
+      {(!isLoading && data) && data.length === 0 && <Typography>Movie Not Found</Typography>}
+      {(!isLoading && data) &&
         data.slice(0, 3).map((item) => {
           return (
-            <ListItem key={item.id} sx={{ display: "flex", gap: "1rem" }}>
+            <ListItem
+              key={item.id}
+              onClick={() => {
+                navigate(`/movies/${item.id}`);
+                handleClose();
+              }}
+              sx={{
+                display: "flex",
+                gap: "1rem",
+                cursor: "pointer",
+                "&:hover": {
+                  border: `1px solid ${defaultTheme.palette.divider}`,
+                },
+              }}
+            >
               <img
                 src={
                   "https://image.tmdb.org/t/p/w600_and_h900_bestv2/" +
@@ -571,10 +592,7 @@ export const RecomCard: React.FC<CastCardProps> = ({ item }) => {
             transform: "translate(-50%, 0)",
           }}
         >
-          <Button
-            variant="outlined"
-            href={`/movies/${item?.id}`}
-          >
+          <Button variant="outlined" href={`/movies/${item?.id}`}>
             More
           </Button>
         </Box>
