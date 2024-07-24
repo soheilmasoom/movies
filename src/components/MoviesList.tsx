@@ -2,13 +2,14 @@ import { useContext, useEffect, useMemo, useRef } from "react";
 import { useInfiniteQuery } from "react-query";
 import { Grid } from "@mui/material";
 import { CheckParams, CheckParamsType } from "../context/CheckParams";
+import { useUserlist } from "../hooks/useUserlist";
 import { GenresList, Movie } from "../pages/Movies";
 import { moviesAPI } from "../App";
 
 // Components
 import MovieCard from "./MovieCard";
 import MovieSkeleton from "./MovieSkeleton";
-import { Loader } from "./MuiCustoms";
+import { AddAlert, Loader } from "./MuiCustoms";
 import ErrorPage from "../pages/ErrorPage";
 
 // Types
@@ -66,6 +67,15 @@ const MoviesList: React.FC<Props> = ({ genresTable }) => {
     }
   }, [data, loadingTarget, hasNextPage, fetchNextPage]);
 
+  // Userlist Hook
+  const {
+    addToList,
+    RemoveFromList,
+    cancelListUpdate,
+    openSnack,
+    setOpenSnack,
+  } = useUserlist();
+
   // // API Client Management
   if (isError) return <ErrorPage error={"Error! Please Try Later"} />;
   if (isFetching) return <MovieSkeleton />;
@@ -88,16 +98,31 @@ const MoviesList: React.FC<Props> = ({ genresTable }) => {
                   key={idx}
                   sx={{ display: "flex", justifyContent: "center" }}
                 >
-                  <MovieCard item={item} genres={genresTable}></MovieCard>
+                  <MovieCard
+                    item={item}
+                    genres={genresTable}
+                    addToList={addToList}
+                    RemoveFromList={RemoveFromList}
+                  ></MovieCard>
                 </Grid>
               );
             });
           })}
       </Grid>
 
+      {/* Loader */}
       <Loader
         ref={loadingTarget}
         sx={{ display: data?.pages[0].results.length > 0 ? "block" : "none" }}
+      />
+
+      {/* Snackbar */}
+      <AddAlert
+        openSnack={openSnack}
+        setOpenSnack={() => setOpenSnack(false)}
+        cancelAdding={() => {
+          cancelListUpdate.current && cancelListUpdate.current();
+        }}
       />
     </>
   );

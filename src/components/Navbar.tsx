@@ -21,6 +21,7 @@ import Aside from "./Aside";
 import { moviesAPI } from "../App";
 import { useQuery } from "react-query";
 import { CheckAccount, CheckAccountType } from "../context/CheckAccount";
+import UserList from "./UserList";
 
 // Types
 interface Props {
@@ -30,13 +31,15 @@ interface Props {
 const Navbar: React.FC<Props> = ({ isNavScrolled }) => {
   const [drawer, toggleDrawer] = useState<boolean>(false);
   const [accountMenu, setAccountMenu] = useState<null | HTMLElement>(null);
+  const [openUserList, setOpenUserList] = useState<
+    boolean | "watchlist" | "favorite"
+  >(false);
   const toggleAccountMenu = Boolean(accountMenu);
   const navigate = useNavigate();
 
   // Context Data
   const theme = useContext<ThemeContext>(DefaultTheme);
-  const { isLogged, apiKey } =
-    useContext<CheckAccountType>(CheckAccount);
+  const { isLogged, apiKey } = useContext<CheckAccountType>(CheckAccount);
 
   // Breakpoints
   const sm = useMediaQuery("(min-width:480px)");
@@ -79,12 +82,11 @@ const Navbar: React.FC<Props> = ({ isNavScrolled }) => {
           session_id: session,
         },
       });
+      localStorage.setItem("account_id", res.data.id);
       return res?.data;
     },
     enabled: isLogged,
   });
-
-  // console.log(accountDetail)
 
   return (
     <>
@@ -131,9 +133,12 @@ const Navbar: React.FC<Props> = ({ isNavScrolled }) => {
           )}
           <AccountMenu
             accountMenu={accountMenu}
-            setAccountMenu={()=>setAccountMenu(null)}
+            setAccountMenu={() => setAccountMenu(null)}
             open={toggleAccountMenu}
             username={accountDetail && accountDetail.username}
+            openUserList={(list: "watchlist" | "favorite") =>
+              setOpenUserList(list)
+            }
           />
 
           {/* Signing Buttons */}
@@ -256,6 +261,12 @@ const Navbar: React.FC<Props> = ({ isNavScrolled }) => {
         {/* Menu FilterOptions */}
         <Aside />
       </Drawer>
+
+      {/* Dashboard & Watchlist */}
+      <UserList
+        openUserList={openUserList}
+        closeUserList={() => setOpenUserList(false)}
+      />
     </>
   );
 };

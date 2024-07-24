@@ -1,10 +1,11 @@
-import { useContext, useState } from "react";
+import { useState } from "react";
 import axios from "axios";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { Container } from "@mui/material";
 import { FilterDataProvider } from "./context/MoviesData";
 import { CheckParamsProvider } from "./context/CheckParams";
+import { ListProvider } from "./context/List";
 import "./main.css";
 
 // Components
@@ -16,7 +17,6 @@ import LogIn from "./pages/LogIn";
 import SignUp from "./pages/SignUp";
 import ErrorPage from "./pages/ErrorPage";
 
-
 // HTTP Req Configuration
 export const moviesAPI = axios.create({
   baseURL: "https://api.themoviedb.org",
@@ -24,8 +24,10 @@ export const moviesAPI = axios.create({
     api_key: "78ab21f3a9e954c04f73cb439d32a5a8",
   },
   headers: {
+    Accept: "application/json",
+    "Content-Type": "application/json",
     Authorization:
-      "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI3OGFiMjFmM2E5ZTk1NGMwNGY3M2NiNDM5ZDMyYTVhOCIsInN1YiI6IjY2NWRkNzI3MzdlNmYzNjhkYzc5OTNmZiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.47csLb-ojIZN_riaBfO2f45rNP_XGhqEIn9PWbg9VFg",
+      "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI3OGFiMjFmM2E5ZTk1NGMwNGY3M2NiNDM5ZDMyYTVhOCIsInN1YiI6IjY2NWRkNzI3MzdlNmYzNjhkYzc5OTNmZiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.47csLb-ojIZN_riaBfO2f45rNP_XGhqEIn9PWbg9VFg",
   },
   // timeout: 5000,
 });
@@ -53,40 +55,36 @@ function App() {
     <QueryClientProvider client={client}>
       <FilterDataProvider>
         <CheckParamsProvider>
-          <Navbar isNavScrolled={isNavScrolled} />
-          <Container
-            component={"main"}
-            maxWidth={"xxl"}
-            sx={{ marginTop: "1rem" }}
-          >
-            <Routes>
-              <Route
-                path="/"
-                element={<Home isNavScrolled={isNavScrolled} />}
-              />
-              <Route
-                path="/movies"
-                element={<Movies isNavScrolled={isNavScrolled} />}
-              />
-              <Route
-                path="/movies/:id"
-                element={<Info isNavScrolled={isNavScrolled} />}
-              />
-              <Route
-                path="/signup"
-                element={<SignUp />}
-              />
-              <Route
-                path="/login"
-                element={<LogIn />}
-              />
-              <Route
-                path="/not-found"
-                element={<ErrorPage error="404 Error: Page Not Found" />}
-              />
-              <Route path="*" element={<Navigate to="/not-found" />} />
-            </Routes>
-          </Container>
+          <ListProvider>
+            <Navbar isNavScrolled={isNavScrolled} />
+            <Container
+              component={"main"}
+              maxWidth={"xxl"}
+              sx={{ marginTop: "1rem" }}
+            >
+              <Routes>
+                <Route
+                  path="/"
+                  element={<Home isNavScrolled={isNavScrolled} />}
+                />
+                <Route
+                  path="/movies"
+                  element={<Movies isNavScrolled={isNavScrolled} />}
+                />
+                <Route
+                  path="/movies/:id"
+                  element={<Info isNavScrolled={isNavScrolled} />}
+                />
+                <Route path="/signup" element={<SignUp />} />
+                <Route path="/login" element={<LogIn />} />
+                <Route
+                  path="/not-found"
+                  element={<ErrorPage error="404 Error: Page Not Found" />}
+                />
+                <Route path="*" element={<Navigate to="/not-found" />} />
+              </Routes>
+            </Container>
+          </ListProvider>
         </CheckParamsProvider>
       </FilterDataProvider>
     </QueryClientProvider>

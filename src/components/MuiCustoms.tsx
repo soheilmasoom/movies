@@ -1,4 +1,10 @@
-import React, { ReactNode, SyntheticEvent, useContext, useState } from "react";
+import React, {
+  ReactNode,
+  SyntheticEvent,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { MdExpandLess, MdExpandMore } from "react-icons/md";
 import { CustomTheme, DefaultTheme, ThemeContext } from "../context/Theme";
 import {
@@ -8,7 +14,6 @@ import {
   AccordionProps,
   AccordionSummary,
   AccordionSummaryProps,
-  Avatar,
   Box,
   Button,
   Card,
@@ -20,6 +25,7 @@ import {
   Collapse,
   Divider,
   Grid,
+  IconButton,
   Link,
   ListItem,
   ListItemIcon,
@@ -27,18 +33,20 @@ import {
   Menu,
   MenuItem,
   Slider,
+  Snackbar,
   Typography,
+  createStyles,
   createTheme,
   styled,
   useMediaQuery,
 } from "@mui/material";
 import { Movie } from "../pages/Movies";
 import { commaSeperate } from "../main";
-import { BsCardChecklist, BsHeartFill, BsPersonAdd } from "react-icons/bs";
-import { CiSettings } from "react-icons/ci";
-import { BiSolidLogOut } from "react-icons/bi";
+import { BsCardChecklist, BsHeartFill, BsX } from "react-icons/bs";
 import { CheckAccount, CheckAccountType } from "../context/CheckAccount";
 import { useNavigate } from "react-router-dom";
+import { BiSolidLogOut } from "react-icons/bi";
+import { Theme } from "@emotion/react";
 
 // Types
 interface SectionProps {
@@ -56,11 +64,17 @@ interface ArticleBoxProps {
   xxl?: number;
   children: ReactNode;
 }
+interface AddAlertProps {
+  openSnack: boolean;
+  setOpenSnack: () => void;
+  cancelAdding: () => void;
+}
 interface AccountMenuProps {
   accountMenu: null | HTMLElement;
   setAccountMenu: () => void;
   open: boolean;
   username: string;
+  openUserList: (list: "watchlist"|"favorite") => void;
 }
 interface AccProps {
   title: string;
@@ -152,6 +166,67 @@ export const ArticleBox: React.FC<ArticleBoxProps> = ({
   );
 };
 
+export const Loader = styled(CircularProgress)({
+  display: "block",
+  margin: "3rem auto 1.75rem auto",
+});
+
+export const AddAlert: React.FC<AddAlertProps> = ({
+  openSnack,
+  setOpenSnack,
+  cancelAdding,
+}) => {
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setProgress((prevProgress) =>
+        prevProgress >= 100 ? 0 : prevProgress + 3
+      );
+    }, 10);
+
+    return () => {
+      clearInterval(timer);
+    };
+  }, []);
+
+  const action = (
+    <Box sx={{ width: "2.5rem", height: "2.5rem", position: "relative" }}>
+      <CircularProgress
+        variant="determinate"
+        value={progress}
+        sx={{ position: "absolute" }}
+      />
+      <IconButton
+        size="small"
+        aria-label="close"
+        color="inherit"
+        sx={{position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)"}}
+        onClick={cancelAdding}
+      >
+        <BsX />
+      </IconButton>
+    </Box>
+  );
+
+  return (
+    <Snackbar
+      open={openSnack}
+      autoHideDuration={3000}
+      onClose={setOpenSnack}
+      message="Movie Added"
+      sx={{
+        "& .MuiSnackbarContent-message": {
+          userSelect: "none",
+        },
+      }}
+      action={
+        action
+      }
+    />
+  );
+};
+
 // Navbar Components
 export const Nav = styled("nav")({
   display: "flex",
@@ -183,13 +258,16 @@ export const SearchMovieOptions: React.FC<SearchMovieOptionsProps> = ({
     marginTop: "0.125rem",
     marginRight: "1rem",
     padding: "0.75rem",
-  });  
+  });
 
   return (
     <OptionsList in={show}>
       {isLoading && <Loader />}
-      {(!isLoading && data) && data.length === 0 && <Typography>Movie Not Found</Typography>}
-      {(!isLoading && data) &&
+      {!isLoading && data && data.length === 0 && (
+        <Typography>Movie Not Found</Typography>
+      )}
+      {!isLoading &&
+        data &&
         data.slice(0, 3).map((item) => {
           return (
             <ListItem
@@ -230,6 +308,7 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({
   setAccountMenu,
   open,
   username,
+  openUserList
 }) => {
   const { changeIsLogged } = useContext<CheckAccountType>(CheckAccount);
 
@@ -274,13 +353,19 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({
         {username}
       </Typography>
       <Divider />
-      <MenuItem onClick={setAccountMenu}>
+      <MenuItem onClick={()=>{
+        openUserList("watchlist")
+        setAccountMenu()
+      }}>
         <ListItemIcon>
           <BsCardChecklist />
         </ListItemIcon>
         Watchlist
       </MenuItem>
-      <MenuItem onClick={setAccountMenu}>
+      <MenuItem onClick={()=>{
+        openUserList("favorite")
+        setAccountMenu()
+      }}>
         <ListItemIcon>
           <BsHeartFill />
         </ListItemIcon>
@@ -289,6 +374,7 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({
       <MenuItem
         onClick={() => {
           localStorage.removeItem("session_id");
+          localStorage.removeItem("account_id");
           changeIsLogged(false);
           setAccountMenu();
         }}
@@ -302,14 +388,10 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({
   );
 };
 
-// MoviesList Components
-export const Loader = styled(CircularProgress)({
-  display: "block",
-  margin: "3rem auto 1.75rem auto",
-});
-
 // MovieCard
 export const MCard = styled(Card)({
+  display: "flex",
+  flexDirection: "column",
   transition: "all 0.3s ease",
   "&:hover": {
     transform: "scale(1.025)",
@@ -319,22 +401,14 @@ export const MCard = styled(Card)({
     position: "relative",
     "& img": {
       objectFit: "cover",
-      height: 220,
-      // position: 'relative',
-      // '&::after': {
-      //     content: '""',
-      //     width: 100 ,
-      //     height: 100,
-      //     position: 'absolute',
-      //     top: 0,
-      //     zIndex: 1000,
-      //     display: 'block'
-      // }
+      height: 320,
     },
   },
   "& .MuiCardContent-root": {
     paddingBottom: 5,
-  },
+    height: "min(100%, 9rem)"
+  }
+ 
 });
 
 export const Rate = (
@@ -691,6 +765,25 @@ export const RecomCard: React.FC<CastCardProps> = ({ item }) => {
     </Card>
   );
 };
+
+// User Options Style
+export const userOption: Record<string, string|number> = createStyles({
+  position: "absolute",
+  width: "4rem",
+  height: "8rem",
+  top: "50%",
+  left: "50%",
+  opacity: 0,
+  zIndex: 1000,
+  transform: "translate(-50%,-50%)",
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  justifyContent: "space-evenly",
+  background: (theme: Theme) => theme.palette.background.paper,
+  borderRadius: "0.5rem",
+  transition: "opacity 0.2s ease",
+})
 
 // Sign Page Components
 export function Copyright(props: any) {

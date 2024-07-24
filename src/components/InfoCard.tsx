@@ -1,15 +1,21 @@
 import {
   Box,
+  Checkbox,
   Chip,
   Grid,
+  IconButton,
   Rating,
   Typography,
   createStyles,
   useMediaQuery,
 } from "@mui/material";
-import { Rate } from "./MuiCustoms";
+import { AddAlert, Rate, userOption } from "./MuiCustoms";
 import { GenresList } from "../pages/Movies";
 import { commaSeperate } from "../main";
+import { BsCardChecklist, BsSuitHeart, BsSuitHeartFill } from "react-icons/bs";
+import { useContext, useEffect, useState } from "react";
+import { List, ListTypes } from "../context/List";
+import { useUserlist } from "../hooks/useUserlist";
 
 // Types
 interface Props {
@@ -25,6 +31,25 @@ const movieInfo: Record<string, string | number> = createStyles({
 });
 
 const InfoCard: React.FC<Props> = ({ detail, cast }) => {
+  const { favlist, addToFavContext, addToWatchContext, deleteFromFavContext } =
+    useContext<ListTypes>(List);
+
+  // Check Favorite Items
+  const [isFav, setIsFav] = useState<boolean>(false);
+  useEffect(() => {
+    const val = favlist.find((movie) => movie.id === detail.id);
+    val ? setIsFav(true) : setIsFav(false);
+  }, []);
+
+  // Userlist Hook
+  const {
+    addToList,
+    RemoveFromList,
+    cancelListUpdate,
+    openSnack,
+    setOpenSnack,
+  } = useUserlist();
+
   // Mediaqueries
   const sm = useMediaQuery("(min-width:480px)");
   const md = useMediaQuery("(min-width:768px)");
@@ -56,11 +81,52 @@ const InfoCard: React.FC<Props> = ({ detail, cast }) => {
         md={6}
         lg={3}
         order={1}
-        component={"img"}
-        src={`https://image.tmdb.org/t/p/w600_and_h900_bestv2/${detail?.poster_path}`}
         height={md ? "420px" : "180px"}
-        sx={{ objectFit: "contain" }}
-      ></Grid>
+        sx={{
+          position: "relative",
+          "&:hover .user-options": {
+            opacity: 0.9,
+          },
+        }}
+      >
+        <Box
+          component={"img"}
+          src={`https://image.tmdb.org/t/p/w600_and_h900_bestv2/${detail?.poster_path}`}
+          height="100%"
+          width="100%"
+          sx={{ objectFit: "contain" }}
+        ></Box>
+
+        <Box
+          className="user-options"
+          sx={{...userOption}}
+        >
+          <IconButton
+            disableRipple
+            onClick={() => {
+              addToList(detail.id, "watchlist");
+              addToWatchContext(detail);
+            }}
+          >
+            <BsCardChecklist size="2.5rem" />
+          </IconButton>
+          <Checkbox
+            icon={<BsSuitHeart size="2.5rem" />}
+            checked={isFav}
+            checkedIcon={<BsSuitHeartFill size="2.5rem" color="red" />}
+            onChange={(e) => {
+              setIsFav(!isFav);
+              if (e.target.checked) {
+                addToList(detail.id, "favorite");
+                addToFavContext(detail);
+              } else {
+                RemoveFromList(detail.id, "favorite");
+                deleteFromFavContext(detail);
+              }
+            }}
+          />
+        </Box>
+      </Grid>
 
       {/* Main Info */}
       <Grid
@@ -262,6 +328,15 @@ const InfoCard: React.FC<Props> = ({ detail, cast }) => {
           </Typography>
         </Box>
       </Grid>
+
+      {/* Snackbar */}
+      <AddAlert
+        openSnack={openSnack}
+        setOpenSnack={() => setOpenSnack(false)}
+        cancelAdding={() => {
+          cancelListUpdate.current && cancelListUpdate.current();
+        }}
+      />
     </>
   );
 };

@@ -84,9 +84,9 @@ const Aside = () => {
           />
         </FormControl>
 
-        {/* <OptionsDivider>Release Date</OptionsDivider>
+        <OptionsDivider>Release Date</OptionsDivider>
         <DateFilterItem dispatch={dispatch} direction={"from"}></DateFilterItem>
-        <DateFilterItem dispatch={dispatch} direction={"to"}></DateFilterItem> */}
+        <DateFilterItem dispatch={dispatch} direction={"to"}></DateFilterItem>
 
         <OptionsDivider>Vote Range</OptionsDivider>
         <RateFilterItem

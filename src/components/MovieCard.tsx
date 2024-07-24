@@ -1,17 +1,20 @@
-import { memo, useContext } from "react";
+import { memo, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CustomTheme, DefaultTheme, ThemeContext } from "../context/Theme";
+import { List, ListTypes } from "../context/List";
 import {
   Box,
-  Button,
   CardActionArea,
   CardActions,
   CardContent,
   CardMedia,
+  Checkbox,
+  IconButton,
   Tooltip,
   Typography,
   Zoom,
 } from "@mui/material";
+import { BsCardChecklist, BsSuitHeart, BsSuitHeartFill } from "react-icons/bs";
 
 // Components
 import { Movie, GenresList } from "../pages/Movies";
@@ -21,11 +24,26 @@ import { Adult, GenreLabel, MCard, Rate } from "./MuiCustoms";
 interface Props {
   item: Movie;
   genres: GenresList;
+  addToList: (id: number, list: string) => void;
+  RemoveFromList: (id: number, list: string) => void;
 }
 
-const MovieCard: React.FC<Props> = ({ item, genres }) => {
+const MovieCard: React.FC<Props> = ({
+  item,
+  genres,
+  addToList,
+  RemoveFromList,
+}) => {
   const rateValue = item.vote_average;
   const genreLabels = item.genre_ids.slice(0, 2);
+  const { favlist, addToFavContext, addToWatchContext, deleteFromFavContext } =
+    useContext<ListTypes>(List);
+  const [isFav, setIsFav] = useState<boolean>(false);
+
+  useEffect(() => {
+    const val = favlist.find((movie) => movie.id === item.id);
+    val ? setIsFav(true) : setIsFav(false);
+  }, []);
 
   // Theme
   const defaultTheme = useContext<ThemeContext>(DefaultTheme)
@@ -114,13 +132,32 @@ const MovieCard: React.FC<Props> = ({ item, genres }) => {
       </CardContent>
 
       {/* Card Footer */}
-      <CardActions>
-        <Button size="small" color="primary">
-          Watch Later
-        </Button>
-        <Button size="small" color="primary">
-          Add to Fav
-        </Button>
+      <CardActions sx={{ display: "flex", justifyContent: "space-around" }}>
+        <IconButton
+          // color="primary"
+          disableRipple
+          onClick={() => {
+            addToList(item.id, "watchlist")
+            addToWatchContext(item)
+          }}
+        >
+          <BsCardChecklist size="1.5rem" />
+        </IconButton>
+        <Checkbox
+          icon={<BsSuitHeart size="1.5rem" />}
+          checked={isFav}
+          checkedIcon={<BsSuitHeartFill color="red" size="1.5rem" />}
+          onChange={(e) => {
+            setIsFav(!isFav);
+            if (e.target.checked) {
+              addToList(item.id, "favorite");
+              addToFavContext(item);
+            } else {
+              RemoveFromList(item.id, "favorite");
+              deleteFromFavContext(item);
+            }
+          }}
+        />
       </CardActions>
     </MCard>
   );
