@@ -1,4 +1,6 @@
 import { Box, Skeleton } from "@mui/material";
+import { themeBorder } from "../context/Theme";
+import { getCenter } from "./MuiCustoms";
 
 const TopSkeleton = () => {
   return (
@@ -10,7 +12,7 @@ const TopSkeleton = () => {
         sx={{ marginX: "auto", marginTop: "2.5rem" }}
       ></Skeleton>
 
-      <Box sx={{ display: "flex", alignItems: "center", marginTop: "6.5rem" }}>
+      <Box sx={{ ...getCenter.flex, marginTop: "6.5rem" }}>
         {Array(5)
           .fill(undefined)
           .map((_, idx) => {
@@ -21,9 +23,10 @@ const TopSkeleton = () => {
                 sx={{
                   width: `${4 + idx}rem`,
                   height: `${6 + idx * 2}rem`,
-                  borderRight: "1px solid #121212",
+                  borderRight: themeBorder[0],
                   borderTopRightRadius: 0,
                   borderBottomRightRadius: 0,
+                  borderColor: theme => theme.palette.background.default,
                 }}
               />
             );
@@ -39,9 +42,10 @@ const TopSkeleton = () => {
                 sx={{
                   width: `${8 - idx}rem`,
                   height: `${14 - idx * 2}rem`,
-                  borderLeft: "1px solid #121212",
+                  borderLeft: themeBorder[0],
                   borderTopLeftRadius: 0,
                   borderBottomLeftRadius: 0,
+                  borderColor: theme => theme.palette.background.default,
                 }}
               />
             );

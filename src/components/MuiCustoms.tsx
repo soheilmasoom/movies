@@ -3,10 +3,18 @@ import React, {
   SyntheticEvent,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from "react";
 import { MdExpandLess, MdExpandMore } from "react-icons/md";
-import { CustomTheme, DefaultTheme, ThemeContext } from "../context/Theme";
+import {
+  CustomTheme,
+  themeBorder,
+  themeGradient,
+  themeRadius,
+  themeShadows,
+  themeTransition,
+} from "../context/Theme";
 import {
   Accordion,
   AccordionDetails,
@@ -36,7 +44,6 @@ import {
   Snackbar,
   Typography,
   createStyles,
-  createTheme,
   styled,
   useMediaQuery,
 } from "@mui/material";
@@ -46,7 +53,7 @@ import { BsCardChecklist, BsHeartFill, BsX } from "react-icons/bs";
 import { CheckAccount, CheckAccountType } from "../context/CheckAccount";
 import { useNavigate } from "react-router-dom";
 import { BiSolidLogOut } from "react-icons/bi";
-import { Theme } from "@emotion/react";
+import { Variant } from "@mui/material/styles/createTypography";
 
 // Types
 interface SectionProps {
@@ -64,17 +71,28 @@ interface ArticleBoxProps {
   xxl?: number;
   children: ReactNode;
 }
+interface GradientProps {
+  isNavScrolled: boolean;
+}
 interface AddAlertProps {
   openSnack: boolean;
   setOpenSnack: () => void;
   cancelAdding: () => void;
+}
+interface TextSlideProps {
+  width: string;
+  variant?: Variant;
+  fontWeight?: number;
+  textAlign?: "left" | "right" | "center";
+  sx?: Record<string, any>;
+  children: string;
 }
 interface AccountMenuProps {
   accountMenu: null | HTMLElement;
   setAccountMenu: () => void;
   open: boolean;
   username: string;
-  openUserList: (list: "watchlist"|"favorite") => void;
+  openUserList: (list: "watchlist" | "favorite") => void;
 }
 interface AccProps {
   title: string;
@@ -90,8 +108,20 @@ interface CastCardProps {
   item: any;
 }
 
-// Theme
-const theme = createTheme();
+// General Styles
+export const getCenter = {
+  static: {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%,-50%)",
+  },
+  flex: {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+};
 
 //General Components
 export const Section: React.FC<SectionProps> = ({
@@ -128,8 +158,7 @@ export const ArticleBox: React.FC<ArticleBoxProps> = ({
   xxl,
   children,
 }) => {
-  const defaultTheme = useContext<ThemeContext>(DefaultTheme)
-    .theme as CustomTheme;
+  const breakpoint = useMediaQuery("(min-width:480px)");
 
   return (
     <Grid
@@ -142,16 +171,21 @@ export const ArticleBox: React.FC<ArticleBoxProps> = ({
       xxl={xxl}
       sx={{
         position: "relative",
-        border: `1px solid ${defaultTheme.palette.divider}`,
-        borderRadius: "0.5rem",
+        border: themeBorder[0],
+        borderColor: "divider",
+        borderRadius: themeRadius[0],
+        minHeight: "5rem",
         padding: "0.5rem",
         paddingTop: "1.5rem",
+        boxShadow: (theme) =>
+          theme.palette.mode === "light" ? themeShadows[2] : themeShadows[3],
       }}
     >
+      {/* Article Title */}
       <Typography
-        variant="h5"
+        variant={breakpoint ? "h5" : "h6"}
         sx={{
-          background: defaultTheme.palette.background.default,
+          background: (theme) => theme.palette.background.default,
           paddingX: 1,
           position: "absolute",
           top: -18,
@@ -166,10 +200,93 @@ export const ArticleBox: React.FC<ArticleBoxProps> = ({
   );
 };
 
+export const Gradient: React.FC<GradientProps> = ({ isNavScrolled }) => {
+  return (
+    <Box
+      sx={{
+        position: isNavScrolled ? "fixed" : "absolute",
+        zIndex: -1,
+        bottom: 0,
+        width: "100%",
+        height: "calc(100% - 3.5rem)",
+        background: (theme) =>
+          theme.palette.mode === "light"
+            ? themeGradient.back.light
+            : themeGradient.back.dark,
+      }}
+    >
+      {/* Divider */}
+      {!isNavScrolled && (
+        <Divider
+          sx={{
+            width: (theme) => (theme.palette.mode === "dark" ? "95%" : "100%"),
+            marginX: "auto",
+          }}
+        />
+      )}
+    </Box>
+  );
+};
+
 export const Loader = styled(CircularProgress)({
   display: "block",
   margin: "3rem auto 1.75rem auto",
 });
+
+export const TextSlide: React.FC<TextSlideProps> = ({
+  width,
+  variant,
+  fontWeight,
+  textAlign,
+  sx,
+  children,
+}) => {
+  const text = useRef<HTMLParagraphElement | null>(null);
+  const [isOver, setIsOver] = useState<boolean>();
+
+  // Check Overflow
+  useEffect(() => {
+    const overflow =
+      text.current && text.current?.offsetWidth < text.current?.scrollWidth;
+
+    overflow ? setIsOver(true) : setIsOver(false);
+  }, []);
+
+  return (
+    <Box
+      ref={text}
+      sx={{
+        ...sx,
+        width,
+        overflow: "hidden",
+      }}
+    >
+      <Typography
+        variant={variant}
+        fontWeight={fontWeight}
+        textAlign={textAlign}
+        sx={{
+          whiteSpace: "nowrap",
+          textOverflow: "ellipsis",
+          transform: "translateX(0)",
+          "&:hover": {
+            animation: isOver ? "textSlide 20s linear infinite" : "none",
+          },
+          "@keyframes textSlide": {
+            form: {
+              transform: "translateX(0)",
+            },
+            to: {
+              transform: "translateX(-100%)",
+            },
+          },
+        }}
+      >
+        {children}
+      </Typography>
+    </Box>
+  );
+};
 
 export const AddAlert: React.FC<AddAlertProps> = ({
   openSnack,
@@ -178,6 +295,7 @@ export const AddAlert: React.FC<AddAlertProps> = ({
 }) => {
   const [progress, setProgress] = useState(0);
 
+  // Timer Interval
   useEffect(() => {
     const timer = setInterval(() => {
       setProgress((prevProgress) =>
@@ -190,6 +308,7 @@ export const AddAlert: React.FC<AddAlertProps> = ({
     };
   }, []);
 
+  // Alert Actions
   const action = (
     <Box sx={{ width: "2.5rem", height: "2.5rem", position: "relative" }}>
       <CircularProgress
@@ -201,7 +320,9 @@ export const AddAlert: React.FC<AddAlertProps> = ({
         size="small"
         aria-label="close"
         color="inherit"
-        sx={{position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)"}}
+        sx={{
+          ...getCenter.static,
+        }}
         onClick={cancelAdding}
       >
         <BsX />
@@ -220,9 +341,7 @@ export const AddAlert: React.FC<AddAlertProps> = ({
           userSelect: "none",
         },
       }}
-      action={
-        action
-      }
+      action={action}
     />
   );
 };
@@ -243,13 +362,15 @@ export const SearchMovieOptions: React.FC<SearchMovieOptionsProps> = ({
   handleClose,
 }) => {
   const navigate = useNavigate();
-  const defaultTheme = useContext<ThemeContext>(DefaultTheme)
-    .theme as CustomTheme;
 
-  const OptionsList = styled(Collapse)({
-    background: defaultTheme.palette.background.paper,
+  // Options List Style
+  const OptionsList = styled(Collapse)(({ theme }) => ({
+    background:
+      theme.palette.mode === "light"
+        ? theme.palette.grey[400]
+        : theme.palette.background.paper,
+    zIndex: theme.zIndex.mobileStepper + 5,
     position: "absolute",
-    zIndex: "1005",
     width: "inherit",
     maxWidth: "442px",
     height: "auto",
@@ -258,7 +379,7 @@ export const SearchMovieOptions: React.FC<SearchMovieOptionsProps> = ({
     marginTop: "0.125rem",
     marginRight: "1rem",
     padding: "0.75rem",
-  });
+  }));
 
   return (
     <OptionsList in={show}>
@@ -281,7 +402,9 @@ export const SearchMovieOptions: React.FC<SearchMovieOptionsProps> = ({
                 gap: "1rem",
                 cursor: "pointer",
                 "&:hover": {
-                  border: `1px solid ${defaultTheme.palette.divider}`,
+                  border: themeBorder[0],
+                  borderRadius: themeRadius[0],
+                  borderColor: "divider",
                 },
               }}
             >
@@ -308,7 +431,7 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({
   setAccountMenu,
   open,
   username,
-  openUserList
+  openUserList,
 }) => {
   const { changeIsLogged } = useContext<CheckAccountType>(CheckAccount);
 
@@ -353,19 +476,23 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({
         {username}
       </Typography>
       <Divider />
-      <MenuItem onClick={()=>{
-        openUserList("watchlist")
-        setAccountMenu()
-      }}>
+      <MenuItem
+        onClick={() => {
+          openUserList("watchlist");
+          setAccountMenu();
+        }}
+      >
         <ListItemIcon>
           <BsCardChecklist />
         </ListItemIcon>
         Watchlist
       </MenuItem>
-      <MenuItem onClick={()=>{
-        openUserList("favorite")
-        setAccountMenu()
-      }}>
+      <MenuItem
+        onClick={() => {
+          openUserList("favorite");
+          setAccountMenu();
+        }}
+      >
         <ListItemIcon>
           <BsHeartFill />
         </ListItemIcon>
@@ -389,13 +516,15 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({
 };
 
 // MovieCard
-export const MCard = styled(Card)({
+export const MCard = styled(Card)(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
-  transition: "all 0.3s ease",
+  backdropFilter: "blue(5px)",
+  boxShadow: theme.palette.mode === "light" ? themeShadows[0] : "none",
+  transition: themeTransition("all", "ease"),
   "&:hover": {
     transform: "scale(1.025)",
-    boxShadow: theme?.shadows[5],
+    boxShadow: theme.palette.mode === "light" && themeShadows[1],
   },
   "& button": {
     position: "relative",
@@ -406,19 +535,13 @@ export const MCard = styled(Card)({
   },
   "& .MuiCardContent-root": {
     paddingBottom: 5,
-    height: "min(100%, 9rem)"
-  }
- 
-});
+    height: "min(100%, 9rem)",
+  },
+}));
 
 export const Rate = (
   props: CircularProgressProps & { value: number; position: string }
 ) => {
-  const defaultTheme = useContext<ThemeContext>(DefaultTheme)
-    .theme as CustomTheme;
-  const darkMode = JSON.parse(
-    localStorage.getItem("theme") as string
-  )?.darkMode;
   const position = props.position;
 
   return (
@@ -436,10 +559,10 @@ export const Rate = (
         sx={{
           position: "relative",
           display: "inline-flex",
-          backgroundColor:
-            defaultTheme?.palette && darkMode
-              ? defaultTheme?.palette.background.default
-              : "#fff",
+          backgroundColor: (theme) =>
+            theme.palette.mode === "light"
+              ? theme.palette.grey[800]
+              : "background.default",
           borderRadius: "50%",
         }}
       >
@@ -456,14 +579,12 @@ export const Rate = (
         />
         <Box
           sx={{
+            ...getCenter.flex,
             top: 0,
             left: 0,
             bottom: 0,
             right: 0,
             position: "absolute",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
           }}
         >
           <Typography
@@ -492,23 +613,21 @@ export const Adult = styled(Chip)({
   padding: 0,
   height: "auto",
   borderRadius: "25%",
-  background: theme.palette.error.dark,
-  color: theme.palette.error.contrastText,
+  background: "error.dark",
+  color: "error.contrastText",
 
   "& span": {
     padding: 5,
   },
 });
 
-export const GenreLabel = styled(Chip)({
+export const GenreLabel = styled(Chip)(({ theme }) => ({
   color: theme.palette.grey[600],
   height: 26,
-});
+}));
 
 // Aside Components
 export const Accord: React.FC<AccProps> = ({ title, children }) => {
-  const defaultTheme = useContext<ThemeContext>(DefaultTheme)
-    .theme as CustomTheme;
   const [expanded, setExpanded] = useState<string | false>(false);
 
   const handleExpand =
@@ -518,9 +637,10 @@ export const Accord: React.FC<AccProps> = ({ title, children }) => {
 
   const MuiAccordion = styled((props: AccordionProps) => (
     <Accordion disableGutters elevation={0} {...props} />
-  ))({
-    border: `2.5px solid ${theme.palette.divider}`,
-    borderRadius: "0.5rem !important",
+  ))(({ theme }) => ({
+    border: themeBorder[1],
+    borderColor: theme.palette.divider,
+    borderRadius: `${themeRadius[0]} !important`,
     width: "100%",
     "&:not(:last-child)": {
       borderBottom: 0,
@@ -528,15 +648,15 @@ export const Accord: React.FC<AccProps> = ({ title, children }) => {
     "&::before": {
       display: "none",
     },
-  });
+  }));
 
   const MuiAccordionSummary = styled((props: AccordionSummaryProps) => (
     <AccordionSummary {...props} />
-  ))({
+  ))(({ theme }) => ({
     backgroundColor:
       theme.palette.mode === "dark"
-        ? "rgba(255, 255, 255, .05)"
-        : "rgba(0, 0, 0, .03)",
+        ? "rgba(0,0,0, .03)"
+        : "rgba(255,255,255,.05)",
     flexDirection: "row-reverse",
     "& .MuiAccordionSummary-expandIconWrapper.Mui-expanded": {
       transform: "rotate(90deg)",
@@ -546,23 +666,22 @@ export const Accord: React.FC<AccProps> = ({ title, children }) => {
       justifyContent: "space-between",
       alignItems: "center",
     },
-  });
+  }));
 
   const MuiAccordionDetails = styled((props: AccordionDetailsProps) => (
     <AccordionDetails {...props} />
-  ))({
-    backgroundColor: defaultTheme?.palette.background.default,
+  ))(({ theme }) => ({
+    backgroundColor: "background.default",
     boxShadow:
-      theme.palette.mode === "light"
-        ? "inset 0 0 6px rgba(65, 65, 65, 0.25)"
-        : "inset 0 0 6px rgba(0,0,0,0.25)",
-    borderTop: "1px solid rgba(0, 0, 0, .125)",
-    borderRadius: "0.5rem",
+      theme.palette.mode === "light" ? themeShadows[2] : themeShadows[3],
+    borderTop: themeBorder[0],
+    borderRadius: themeRadius[0],
+    borderColor: "rgba(0, 0, 0, 0.125)",
     display: "flex",
     flexDirection: "column",
     gap: 15,
     padding: theme.spacing(2),
-  });
+  }));
 
   return (
     <MuiAccordion expanded={expanded === title} onChange={handleExpand(title)}>
@@ -583,12 +702,12 @@ export const Sidebar = styled(Box)({
   height: "90vh",
 });
 
-export const OptionsDivider = styled(Divider)({
+export const OptionsDivider = styled(Divider)(({ theme }) => ({
   span: {
     color: theme.palette.grey[800],
     fontSize: "0.95rem",
   },
-});
+}));
 
 // DateFilterItem Components
 export const DateBox = styled(Box)({
@@ -606,7 +725,7 @@ export const DateBox = styled(Box)({
 });
 
 // RateFilterItem Components
-export const MuiSlider = styled(Slider)({
+export const MuiSlider = styled(Slider)(({ theme }) => ({
   color: theme.palette.primary.dark,
   height: 6,
   "& .MuiSlider-track": {
@@ -643,18 +762,19 @@ export const MuiSlider = styled(Slider)({
       transform: "rotate(45deg)",
     },
   },
-});
+}));
 
 // Info Components
 export const CastCard: React.FC<CastCardProps> = ({ item }) => {
   const sm = useMediaQuery("(min-width:500px)");
+
   return (
     <Card
       sx={{
         position: "relative",
         width: sm ? "12rem" : "8rem",
         height: sm ? "18rem" : "12rem",
-        borderRadius: "1rem",
+        borderRadius: themeRadius[1],
       }}
     >
       <CardMedia
@@ -663,22 +783,27 @@ export const CastCard: React.FC<CastCardProps> = ({ item }) => {
       ></CardMedia>
       <CardContent
         sx={{
+          backgroundColor: (theme) => theme.palette.grey[900],
+          color: (theme) => theme.palette.grey[200],
           position: "absolute",
           bottom: 0,
           width: sm ? "12rem" : "8rem",
-          backgroundColor: theme.palette.grey[900],
           opacity: 0.8,
           padding: "1rem 0 !important",
           display: "flex",
           flexDirection: "column",
         }}
       >
-        <Typography fontWeight={700} textAlign={"center"}>
+        <TextSlide width="min(100%, 12rem)" fontWeight={700} textAlign="center">
           {item?.name}
-        </Typography>
-        <Typography variant="subtitle2" textAlign={"center"}>
+        </TextSlide>
+        <TextSlide
+          width="min(100%, 12rem)"
+          variant="subtitle2"
+          textAlign="center"
+        >
           {item?.character}
-        </Typography>
+        </TextSlide>
       </CardContent>
     </Card>
   );
@@ -693,7 +818,7 @@ export const RecomCard: React.FC<CastCardProps> = ({ item }) => {
         position: "relative",
         width: sm ? "12rem" : "8rem",
         height: sm ? "18rem" : "12rem",
-        borderRadius: "1rem",
+        borderRadius: themeRadius[1],
       }}
     >
       {/* Card Image */}
@@ -705,61 +830,81 @@ export const RecomCard: React.FC<CastCardProps> = ({ item }) => {
       {/* Card Content */}
       <CardContent
         sx={{
+          backgroundColor: (theme) => theme.palette.grey[900],
+          color: (theme) => theme.palette.grey[200],
           position: "absolute",
           bottom: 0,
           width: sm ? "12rem" : "8rem",
           height: sm ? "16rem" : "10rem",
-          backgroundColor: theme.palette.grey[900],
           opacity: 0,
           padding: "1rem 0 !important",
-          display: "flex",
-          flexDirection: "column",
-          gap: "0.75rem",
-          transition: "opacity 0.2s linear",
+          transition: themeTransition("opacity"),
           "&:hover": {
-            opacity: 0.8,
-            transition: "opacity 0.2s linear",
+            opacity: 0.9,
+            transition: themeTransition("opacity"),
           },
         }}
       >
-        {/* Title */}
-        <Typography
-          variant="h6"
-          fontWeight={700}
-          textAlign={"center"}
-          margin="0.5rem"
-          marginTop={2.5}
-        >
-          {item?.original_title}
-        </Typography>
-
-        {/* Release Date */}
-        <Typography variant="subtitle2" textAlign={"center"}>
-          {item?.release_date.split("-").join("/")}
-        </Typography>
-
-        {/* Popularity */}
-        <Typography variant="subtitle2" textAlign={"center"}>
-          {commaSeperate(Math.floor(item?.popularity * 1000))}
-        </Typography>
-
-        {/* Rate */}
-        <Box sx={{ textAlign: "center" }}>
-          <Chip label={`${Math.floor(item?.vote_average * 10)}%`} />
-        </Box>
-
-        {/* More Button */}
         <Box
           sx={{
-            position: "absolute",
-            bottom: "1.5rem",
-            left: "50%",
-            transform: "translate(-50%, 0)",
+            width: "100%",
+            height: sm ? "75%" : "65%",
+            overflow: "hidden",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
+            alignItems: "center",
           }}
         >
-          <Button variant="outlined" href={`/movies/${item?.id}`}>
-            More
-          </Button>
+          {/* Title */}
+          <Typography
+            variant="h6"
+            fontWeight={700}
+            textAlign="center"
+            margin="0.5rem"
+            sx={{
+              textOverflow: "ellipsis",
+            }}
+          >
+            {item?.original_title}
+          </Typography>
+
+          {sm && (
+            <>
+              {/* Release Date */}
+              <Typography variant="subtitle2" textAlign={"center"}>
+                {item?.release_date.split("-").join("/")}
+              </Typography>
+
+              {/* Popularity */}
+              <Typography variant="subtitle2" textAlign={"center"}>
+                {`${commaSeperate(Math.floor(item?.popularity * 1000))} votes`}
+              </Typography>
+
+              {/* Rate */}
+              <Box sx={{ textAlign: "center" }}>
+                <Chip
+                  label={`${Math.floor(item?.vote_average * 10)}%`}
+                  variant="outlined"
+                  color="primary"
+                />
+              </Box>
+            </>
+          )}
+
+          {/* More Button */}
+          <Box
+            sx={{
+              position: "absolute",
+              bottom: "1.5rem",
+              left: "50%",
+              transform: "translate(-50%, 0)",
+            }}
+          >
+            <Button variant="contained" href={`/movies/${item?.id}`}>
+              More
+            </Button>
+          </Box>
         </Box>
       </CardContent>
     </Card>
@@ -767,23 +912,20 @@ export const RecomCard: React.FC<CastCardProps> = ({ item }) => {
 };
 
 // User Options Style
-export const userOption: Record<string, string|number> = createStyles({
-  position: "absolute",
+export const userOption: Record<string, string | number> = createStyles({
+  background: (theme: CustomTheme) => theme.palette.background.paper,
+  zIndex: (theme: CustomTheme) => theme.zIndex.mobileStepper,
+  ...getCenter.static,
   width: "4rem",
   height: "8rem",
-  top: "50%",
-  left: "50%",
   opacity: 0,
-  zIndex: 1000,
-  transform: "translate(-50%,-50%)",
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
   justifyContent: "space-evenly",
-  background: (theme: Theme) => theme.palette.background.paper,
-  borderRadius: "0.5rem",
-  transition: "opacity 0.2s ease",
-})
+  borderRadius: themeRadius[0],
+  transition: themeTransition("opacity"),
+});
 
 // Sign Page Components
 export function Copyright(props: any) {
@@ -795,7 +937,7 @@ export function Copyright(props: any) {
       {...props}
     >
       {"Copyright © "}
-      <Link color="inherit" href="https://mui.com/">
+      <Link color="inherit" href="/">
         Your Website
       </Link>{" "}
       {new Date().getFullYear()}

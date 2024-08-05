@@ -4,6 +4,7 @@ import {
   Box,
   Button,
   Checkbox,
+  createStyles,
   Divider,
   Drawer,
   IconButton,
@@ -11,16 +12,23 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import { BsList, BsSunFill, BsX } from "react-icons/bs";
-import { CustomTheme, DefaultTheme, ThemeContext } from "../context/Theme";
+import {
+  CustomTheme,
+  DefaultTheme,
+  themeBorder,
+  ThemeContext,
+  themeGradient,
+  themeTransition,
+} from "../context/Theme";
+import { CheckAccount, CheckAccountType } from "../context/CheckAccount";
+import { moviesAPI } from "../App";
+import { useQuery } from "react-query";
 import { useNavigate } from "react-router-dom";
 
 // Components
-import { AccountMenu, Nav } from "./MuiCustoms";
+import { AccountMenu, getCenter, Nav } from "./MuiCustoms";
 import SearchMovie from "./SearchMovie";
 import Aside from "./Aside";
-import { moviesAPI } from "../App";
-import { useQuery } from "react-query";
-import { CheckAccount, CheckAccountType } from "../context/CheckAccount";
 import UserList from "./UserList";
 
 // Types
@@ -37,8 +45,10 @@ const Navbar: React.FC<Props> = ({ isNavScrolled }) => {
   const toggleAccountMenu = Boolean(accountMenu);
   const navigate = useNavigate();
 
+  // Mode Toggle Context
+  const { checkMode } = useContext<ThemeContext>(DefaultTheme);
+
   // Context Data
-  const theme = useContext<ThemeContext>(DefaultTheme);
   const { isLogged, apiKey } = useContext<CheckAccountType>(CheckAccount);
 
   // Breakpoints
@@ -49,20 +59,28 @@ const Navbar: React.FC<Props> = ({ isNavScrolled }) => {
   const showUserButton = useMediaQuery("(max-width:480px)");
 
   // NavScrolled Styles
-  const styles = {
-    position: "fixed",
-    zIndex: "1009",
-    width: "100%",
-    background: (theme.theme as CustomTheme)?.palette.background.default,
-    borderBottom: `1px solid ${(theme.theme as CustomTheme)?.palette.divider}`,
-    boxShadow: `0 10px 10px ${
-      (theme.theme as CustomTheme)?.palette.background.default
+  const styles = createStyles({
+    "@keyframes showNav": {
+      "0%": {
+        height: "0"
+      },
+      "100%": {
+        height: "3.5rem"
+      }
     },
-     0 5px 5px ${
-       (theme.theme as CustomTheme)?.palette.background.default
-     } !important`,
-    transition: "position 0.2s ease, background 0.2s ease",
-  };
+    background: (theme: CustomTheme) => theme.palette.secondary.main,
+    zIndex: (theme: CustomTheme) => theme.zIndex.mobileStepper,
+    position: "fixed",
+    width: "100%",
+    top: 0,
+    borderBottom: themeBorder[0],
+    borderColor: "divider",
+    transition: `${themeTransition("position", "ease")}, ${themeTransition(
+      "background",
+      "ease"
+    )}`,
+    animation: "showNav 0.1s linear",
+  });
 
   // Mui Props
   const label = { inputProps: { "aria-label": "Darkmode Checkbox" } };
@@ -91,15 +109,27 @@ const Navbar: React.FC<Props> = ({ isNavScrolled }) => {
   return (
     <>
       {/* Header */}
-      <Nav sx={!isNavScrolled ? {} : { ...styles }}>
+      <Nav
+        sx={
+          !isNavScrolled
+            ? {
+                background: (theme) => theme.palette.secondary.main,
+              }
+            : styles
+        }
+      >
         {/* Webpage Title */}
         <Button
           disableRipple
           sx={{
             fontSize: "1.75rem",
             fontWeight: 700,
-            background: "none !important",
-            color: (theme.theme as CustomTheme).palette.text.primary,
+            background: (theme) =>
+              theme.palette.mode === "dark"
+                ? themeGradient.title.dark
+                : themeGradient.title.light,
+            backgroundClip: "text",
+            color: "transparent",
           }}
           onClick={() => navigate("/")}
         >
@@ -110,9 +140,9 @@ const Navbar: React.FC<Props> = ({ isNavScrolled }) => {
         {md && <SearchMovie width="22rem" />}
 
         {/* Nav Buttons */}
-        <Box sx={{ display: "flex", alignItems: "center" }}>
+        <Box sx={getCenter.flex}>
           {/* Account Setting */}
-          {isLogged && accountDetail && (
+          {isLogged && (
             <Tooltip title="Account settings">
               <IconButton
                 onClick={(event: React.MouseEvent<HTMLElement>) => {
@@ -125,8 +155,12 @@ const Navbar: React.FC<Props> = ({ isNavScrolled }) => {
                 aria-expanded={toggleAccountMenu ? "true" : undefined}
               >
                 <Avatar
-                  src={accountDetail.avatar.tmdb.avatar_path}
-                  sx={{ width: 32, height: 32 }}
+                  src={accountDetail && accountDetail.avatar.tmdb.avatar_path}
+                  sx={{
+                    width: 32,
+                    height: 32,
+                    backgroundColor: "secondary.dark",
+                  }}
                 />
               </IconButton>
             </Tooltip>
@@ -144,8 +178,28 @@ const Navbar: React.FC<Props> = ({ isNavScrolled }) => {
           {/* Signing Buttons */}
           {sm && !isLogged && (
             <>
-              <Button onClick={() => navigate("/login")}>Login</Button>
-              <Button onClick={() => navigate("/signup")}>Sign Up</Button>
+              <Button
+                sx={{
+                  color: (theme) =>
+                    theme.palette.mode === "dark"
+                      ? theme.palette.grey[400]
+                      : theme.palette.secondary.dark,
+                }}
+                onClick={() => navigate("/login")}
+              >
+                Login
+              </Button>
+              <Button
+                sx={{
+                  color: (theme) =>
+                    theme.palette.mode === "dark"
+                      ? theme.palette.grey[400]
+                      : theme.palette.secondary.dark,
+                }}
+                onClick={() => navigate("/signup")}
+              >
+                Sign Up
+              </Button>
             </>
           )}
 
@@ -156,7 +210,7 @@ const Navbar: React.FC<Props> = ({ isNavScrolled }) => {
               JSON.parse(localStorage.getItem("theme") as string)?.darkMode
             }
             onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-              theme.checkMode(event.target.checked);
+              checkMode(event.target.checked);
               localStorage.setItem(
                 "theme",
                 JSON.stringify({ darkMode: event.target.checked })
@@ -164,27 +218,54 @@ const Navbar: React.FC<Props> = ({ isNavScrolled }) => {
             }}
             icon={
               <BsSunFill
-                style={{ color: "#121212", transition: "all 0.3s ease" }}
+                style={{
+                  transition: themeTransition("all", "ease"),
+                  fontSize: "1.5rem",
+                }}
               />
             }
             checkedIcon={
               <BsSunFill
-                style={{ color: "#fff", transition: "all 0.3s ease" }}
+                style={{
+                  transition: themeTransition("all", "ease"),
+                  fontSize: "1.5rem",
+                }}
               />
             }
-            sx={{ marginX: 0.5, display: !lg ? "none" : "inline-block" }}
+            sx={{
+              display: !lg ? "none" : "inline-block",
+              lineHeight: 0,
+              "& svg": {
+                color: (theme) => theme.palette.secondary.dark,
+                transition: themeTransition("color", "ease"),
+              },
+              "&:hover svg": {
+                color: (theme) =>
+                  theme.palette.getContrastText(
+                    theme.palette.background.default
+                  ),
+              },
+            }}
           />
 
           {/* Nav Menu Toggle */}
           {!lg && (
-            <Button>
+            <Button
+              sx={{
+                color: (theme) => theme.palette.secondary.dark,
+                paddingX: "0.5rem",
+                transition: themeTransition("transform"),
+                minWidth: 0,
+                "&:hover": {
+                  transform: "scale(1.125)",
+                },
+              }}
+            >
               <BsList size="1.5rem" onClick={() => toggleDrawer(true)} />
             </Button>
           )}
         </Box>
       </Nav>
-
-      <Divider sx={{ width: "95%", marginX: "auto" }} />
 
       {/* Navbar Menu */}
       <Drawer
@@ -205,7 +286,20 @@ const Navbar: React.FC<Props> = ({ isNavScrolled }) => {
         <Box sx={{ display: "flex", justifyContent: "space-between" }}>
           <Checkbox
             {...label}
-            sx={{ marginLeft: "-0.5rem" }}
+            sx={{
+              marginLeft: "-0.5rem",
+              transition: themeTransition("opacity", "ease"),
+              "& svg": {
+                color: (theme) => theme.palette.secondary.dark,
+                transition: themeTransition("color", "ease"),
+              },
+              "&:hover svg": {
+                color: (theme) =>
+                  theme.palette.getContrastText(
+                    theme.palette.background.default
+                  ),
+              },
+            }}
             checked={
               JSON.parse(localStorage.getItem("theme") as string)?.darkMode
             }
@@ -219,20 +313,34 @@ const Navbar: React.FC<Props> = ({ isNavScrolled }) => {
             icon={
               <BsSunFill
                 size={"1.75rem"}
-                style={{ color: "#121212", transition: "all 0.3s ease" }}
+                style={{
+                  transition: themeTransition("all", "ease"),
+                }}
               />
             }
             checkedIcon={
               <BsSunFill
                 size={"1.75rem"}
-                style={{ color: "#fff", transition: "all 0.3s ease" }}
+                style={{
+                  transition: themeTransition("all", "ease"),
+                }}
               />
             }
           />
           <IconButton
             disableRipple
             onClick={() => toggleDrawer(false)}
-            sx={{ padding: 0, marginRight: "-0.5rem" }}
+            sx={{
+              padding: 0,
+              marginRight: "-0.5rem",
+              "& svg": {
+                color: (theme) => theme.palette.secondary.dark,
+                transition: themeTransition("color", "ease"),
+              },
+              "&:hover svg": {
+                color: (theme) => theme.palette.error.main,
+              },
+            }}
           >
             <BsX size="2.5rem" />
           </IconButton>

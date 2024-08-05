@@ -11,7 +11,7 @@ import { TransitionProps } from "@mui/material/transitions";
 import React, { forwardRef, memo, useContext, useMemo } from "react";
 import { BsTrash, BsX } from "react-icons/bs";
 import { useNavigate } from "react-router-dom";
-import { CustomTheme, DefaultTheme, ThemeContext } from "../context/Theme";
+import { themeBorder } from "../context/Theme";
 import { AddAlert } from "./MuiCustoms";
 import { useUserlist } from "../hooks/useUserlist";
 import { List } from "../context/List";
@@ -35,10 +35,7 @@ const Transition = forwardRef(function Transition(
 const UserList: React.FC<UserListProps> = ({ openUserList, closeUserList }) => {
   const { watchlist, favlist, deleteFromFavContext, deleteFromWatchContext } =
     useContext(List);
-
   const navigate = useNavigate();
-  const defaultTheme = useContext<ThemeContext>(DefaultTheme)
-    .theme as CustomTheme;
 
   // List Data
   const data = useMemo(() => {
@@ -91,7 +88,8 @@ const UserList: React.FC<UserListProps> = ({ openUserList, closeUserList }) => {
                     display: "flex",
                     gap: "1rem",
                     "&:hover": {
-                      border: `1px solid ${defaultTheme.palette.divider}`,
+                      border: themeBorder[0],
+                      borderColor: "divider"
                     },
                   }}
                 >

@@ -17,28 +17,14 @@ import {
   InputLabel,
   OutlinedInput,
 } from "@mui/material";
-import { useContext, useState } from "react";
+import { useState } from "react";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { CustomTheme, DefaultTheme, ThemeContext } from "../context/Theme";
 
 export default function SignUp() {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [showConfirmPassword, setShowConfirmPassword] =
     useState<boolean>(false);
-
-  // Theme
-  const defaultTheme = useContext<ThemeContext>(DefaultTheme)
-    .theme as CustomTheme;
-
-  // const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-  //   event.preventDefault();
-  //   const data = new FormData(event.currentTarget);
-  //   console.log({
-  //     email: data.get("email"),
-  //     password: data.get("password"),
-  //   });
-  // };
 
   // Schema
   const schema = yup.object().shape({
@@ -66,8 +52,6 @@ export default function SignUp() {
   const submition = (data: any) => {
     console.log(data);
   };
-
-  // console.log(errors.lastName)
 
   return (
     <>
@@ -172,9 +156,6 @@ export default function SignUp() {
                   }
                   label="Password"
                 />
-                {/* <Typography variant="subtitle2" color="error.main">
-                  {errors.password?.message}
-                </Typography> */}
               </FormControl>
             </Grid>
 

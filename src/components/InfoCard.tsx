@@ -9,7 +9,7 @@ import {
   createStyles,
   useMediaQuery,
 } from "@mui/material";
-import { AddAlert, Rate, userOption } from "./MuiCustoms";
+import { AddAlert, getCenter, Rate, userOption } from "./MuiCustoms";
 import { GenresList } from "../pages/Movies";
 import { commaSeperate } from "../main";
 import { BsCardChecklist, BsSuitHeart, BsSuitHeartFill } from "react-icons/bs";
@@ -74,6 +74,17 @@ const InfoCard: React.FC<Props> = ({ detail, cast }) => {
 
   return (
     <>
+      {/* Title */}
+      {md && !lg && (
+        <Grid item xs={12} sx={{ marginBottom: "-1rem" }}>
+          <Box sx={{ textAlign: "center" }}>
+            <Typography variant="h3" fontWeight={700}>
+              {detail?.original_title}
+            </Typography>
+          </Box>
+        </Grid>
+      )}
+
       {/* Poster */}
       <Grid
         item
@@ -89,6 +100,7 @@ const InfoCard: React.FC<Props> = ({ detail, cast }) => {
           },
         }}
       >
+        {/* Image */}
         <Box
           component={"img"}
           src={`https://image.tmdb.org/t/p/w600_and_h900_bestv2/${detail?.poster_path}`}
@@ -97,10 +109,8 @@ const InfoCard: React.FC<Props> = ({ detail, cast }) => {
           sx={{ objectFit: "contain" }}
         ></Box>
 
-        <Box
-          className="user-options"
-          sx={{...userOption}}
-        >
+        {/* User Options */}
+        <Box className="user-options" sx={{ ...userOption }}>
           <IconButton
             disableRipple
             onClick={() => {
@@ -157,7 +167,7 @@ const InfoCard: React.FC<Props> = ({ detail, cast }) => {
         </Box>
 
         {/* Credits */}
-        <Grid container spacing={2}>
+        <Grid container spacing={2} sx={{ maxWidth: "40rem" }}>
           {/* Director */}
           <Grid item xs={6} sm={3} sx={{ textAlign: sm ? "start" : "center" }}>
             <Typography variant="body1" fontWeight={700}>
@@ -232,13 +242,15 @@ const InfoCard: React.FC<Props> = ({ detail, cast }) => {
         </Box>
 
         {/* Genres */}
-        <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap" }}>
+        <Box sx={{ display: "flex", gap: 1.5 }}>
           <Typography variant="h6" fontWeight={700}>
             Genres:
           </Typography>
-          {detail.genres.map((genre: GenresList) => {
-            return <Chip label={genre.name}></Chip>;
-          })}
+          <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap" }}>
+            {detail.genres.map((genre: GenresList) => {
+              return <Chip label={genre.name}></Chip>;
+            })}
+          </Box>
         </Box>
       </Grid>
 
@@ -251,31 +263,28 @@ const InfoCard: React.FC<Props> = ({ detail, cast }) => {
         order={lg ? 3 : md ? 2 : 3}
         sx={{ ...movieInfo, paddingTop: "0.6rem", alignItems: "center" }}
       >
-        {/* Title */}
-        {md && !lg && (
-          <Box sx={{ textAlign: "center" }}>
-            <Typography variant="h3" fontWeight={700}>
-              {detail?.original_title}
-            </Typography>
-
-            {/* Subtitle */}
-            <Typography variant="subtitle2">
-              {detail.status} -{" "}
-              {detail.origin_country.map((country: string) => country)} (
-              {detail.original_language})
-            </Typography>
-          </Box>
-        )}
-
         {/* Rate */}
-        <Box sx={{ display: "flex", alignItems: "center", gap: 3 }}>
-          <Rating
-            name="size-large"
-            defaultValue={2.5}
-            precision={0.5}
-            size="large"
-          />
-          <Rate value={detail?.vote_average * 10} position="relative" />
+        <Box>
+          <Box sx={{ ...getCenter.flex, gap: 3 }}>
+            <Rating
+              name="size-large"
+              defaultValue={2.5}
+              precision={0.5}
+              size="large"
+            />
+            <Rate value={detail?.vote_average * 10} position="relative" />
+          </Box>
+
+          {/* Subtitle */}
+          {md && !lg && (
+            <Box sx={{ textAlign: "center" }}>
+              <Typography variant="subtitle2">
+                {detail.status} -{" "}
+                {detail.origin_country.map((country: string) => country)} (
+                {detail.original_language})
+              </Typography>
+            </Box>
+          )}
         </Box>
 
         {/* Popularity */}

@@ -1,13 +1,14 @@
 import React, { useContext, useEffect, useMemo } from "react";
 import { useLocation } from "react-router-dom";
 import { useQuery } from "react-query";
-import { Box, Stack, useMediaQuery } from "@mui/material";
+import { Box, Stack, Typography, useMediaQuery } from "@mui/material";
 import { moviesAPI } from "../App";
 
 // Components
 import {
   ArticleBox,
   CastCard,
+  getCenter,
   Loader,
   RecomCard,
   Section,
@@ -27,7 +28,8 @@ const Info: React.FC<Props> = ({ isNavScrolled }) => {
   // Page Param
   const param = useLocation();
   const pageParam = useMemo(() => {
-    const id = param.pathname.split("/").at(-1);
+    const path = param.pathname.split("/");
+    const id = path.at(-1);
     return id;
   }, [param]);
 
@@ -79,10 +81,11 @@ const Info: React.FC<Props> = ({ isNavScrolled }) => {
   }, [pageParam]);
 
   // Theme
-  const defaultTheme = useContext<ThemeContext>(DefaultTheme)
-    .theme as CustomTheme;
+  const mode = (useContext<ThemeContext>(DefaultTheme).theme as CustomTheme)
+    .palette.mode;
 
   // Breakpoints
+  const sm = useMediaQuery("(min-width:600px)");
   const md = useMediaQuery("(min-width:768px)");
   const lg = useMediaQuery("(min-width:992px)");
   const xl = useMediaQuery("(min-width:1280px)");
@@ -103,9 +106,7 @@ const Info: React.FC<Props> = ({ isNavScrolled }) => {
           <Section
             paddingX
             backgroundColor={
-              defaultTheme.palette.mode === "dark"
-                ? "rgba(18,18,18,0.7)"
-                : "rgba(184, 189, 181, 0.7)"
+              mode === "dark" ? "rgba(26,27,31,0.7)" : "rgba(255,255,255,0.7)"
             }
           >
             <InfoCard detail={detailData} cast={castData} />
@@ -115,8 +116,9 @@ const Info: React.FC<Props> = ({ isNavScrolled }) => {
         {/* Cast List */}
         <Section>
           <ArticleBox title="cast" xs={12}>
+          {castData.cast.length === 0 && <Typography sx={{...getCenter.static}}>No Casts Found!</Typography>}
             <Swiper
-              slidesPerView={xl ? 6 : lg ? 5 : md ? 4 : 3}
+              slidesPerView={xl ? 6 : lg ? 5 : md ? 4 : sm ? 3 : 2}
               grabCursor={true}
             >
               {castData.cast.map((item: any) => {
@@ -132,8 +134,12 @@ const Info: React.FC<Props> = ({ isNavScrolled }) => {
 
         {/* Recommendation List */}
         <Section>
-          <ArticleBox title="Recommended Movies" xs={12}>
-            <Swiper slidesPerView={6} grabCursor={true}>
+          <ArticleBox title="Recommendations" xs={12}>
+            {recomData.length === 0 && <Typography sx={{...getCenter.static}}>No Recommendations Found!</Typography>}
+            <Swiper
+              slidesPerView={xl ? 6 : lg ? 5 : md ? 4 : sm ? 3 : 2}
+              grabCursor={true}
+            >
               {recomData.map((item: any) => {
                 return (
                   <SwiperSlide>

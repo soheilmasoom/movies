@@ -1,6 +1,5 @@
 import { memo, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { CustomTheme, DefaultTheme, ThemeContext } from "../context/Theme";
 import { List, ListTypes } from "../context/List";
 import {
   Box,
@@ -18,7 +17,7 @@ import { BsCardChecklist, BsSuitHeart, BsSuitHeartFill } from "react-icons/bs";
 
 // Components
 import { Movie, GenresList } from "../pages/Movies";
-import { Adult, GenreLabel, MCard, Rate } from "./MuiCustoms";
+import { Adult, GenreLabel, MCard, Rate, TextSlide } from "./MuiCustoms";
 
 // Types
 interface Props {
@@ -40,14 +39,11 @@ const MovieCard: React.FC<Props> = ({
     useContext<ListTypes>(List);
   const [isFav, setIsFav] = useState<boolean>(false);
 
+  // Set Favorite Movies
   useEffect(() => {
     const val = favlist.find((movie) => movie.id === item.id);
     val ? setIsFav(true) : setIsFav(false);
   }, []);
-
-  // Theme
-  const defaultTheme = useContext<ThemeContext>(DefaultTheme)
-    .theme as CustomTheme;
 
   // Redirection
   const navigate = useNavigate();
@@ -75,74 +71,62 @@ const MovieCard: React.FC<Props> = ({
         <Rate value={rateValue * 10} position="absolute" />
       </CardActionArea>
 
+      {/* Card Content */}
       <CardContent sx={{ position: "relative" }}>
         {/* Movie Title */}
-        {item.original_title.length > 22 ? (
-          <Tooltip
-            title={item.original_title}
-            TransitionComponent={Zoom}
-            placement="top"
-            arrow
-          >
-            <Typography
-              gutterBottom
-              variant="h6"
-              component="div"
-              sx={{ marginBottom: 1 }}
-            >
-              {item.original_title.slice(0, 20) + "..."}
-            </Typography>
-          </Tooltip>
-        ) : (
-          <Typography
-            gutterBottom
-            variant="h6"
-            component="div"
-            sx={{ marginBottom: 1 }}
-          >
-            {item.original_title}
-          </Typography>
-        )}
+        <TextSlide
+          width="min(100%, 18rem)"
+          variant="h6"
+          sx={{ marginBottom: 1 }}
+        >
+          {item?.original_title}
+        </TextSlide>
 
         {/* Movie Release Date */}
         <Box sx={{ display: "flex", justifyContent: "space-between" }}>
           <Typography
             gutterBottom
             variant="body2"
-            color={defaultTheme?.palette.grey[700]}
-            sx={{ marginBottom: 0.75 }}
+            sx={{
+              marginBottom: 0.75,
+              color: (theme) => theme.palette.grey[700],
+            }}
           >
-            Release: {item.release_date}
+            Release: {item.release_date ? item.release_date : "---"}
           </Typography>
         </Box>
 
         {/* Movie Genres */}
         <Box sx={{ display: "flex", gap: 1.5 }}>
-          {genreLabels.map((genre, idx) => {
-            const genreIdx = genre.toString();
-            return (
-              <GenreLabel
-                label={genres[genreIdx]}
-                variant="outlined"
-                key={idx}
-              ></GenreLabel>
-            );
-          })}
+          {genreLabels.length > 0 ? (
+            genreLabels.map((genre, idx) => {
+              const genreIdx = genre.toString();
+              return (
+                <GenreLabel
+                  key={idx}
+                  label={genres[genreIdx]}
+                  variant="outlined"
+                />
+              );
+            })
+          ) : (
+            <GenreLabel label={"No Genre"} variant="outlined" />
+          )}
         </Box>
       </CardContent>
 
       {/* Card Footer */}
       <CardActions sx={{ display: "flex", justifyContent: "space-around" }}>
         <IconButton
-          // color="primary"
           disableRipple
           onClick={() => {
-            addToList(item.id, "watchlist")
-            addToWatchContext(item)
+            addToList(item.id, "watchlist");
+            addToWatchContext(item);
           }}
         >
           <BsCardChecklist size="1.5rem" />
         </IconButton>
+
         <Checkbox
           icon={<BsSuitHeart size="1.5rem" />}
           checked={isFav}

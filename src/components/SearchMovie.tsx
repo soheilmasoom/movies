@@ -6,11 +6,12 @@ import { BsSearch } from "react-icons/bs";
 // Components
 import { Movie } from "../pages/Movies";
 import { SearchMovieOptions } from "./MuiCustoms";
+import { themeRadius } from "../context/Theme";
 
 // Styled Component
 const SearchInput = styled(OutlinedInput)({
   width: "100%",
-  borderRadius: "2.5rem !important",
+  borderRadius: `${themeRadius[4]} !important`,
 
   input: {
     height: "0.5rem",

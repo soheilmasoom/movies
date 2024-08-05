@@ -16,6 +16,7 @@ import Info from "./pages/Info";
 import LogIn from "./pages/LogIn";
 import SignUp from "./pages/SignUp";
 import ErrorPage from "./pages/ErrorPage";
+import { Gradient } from "./components/MuiCustoms";
 
 // HTTP Req Configuration
 export const moviesAPI = axios.create({
@@ -56,11 +57,12 @@ function App() {
       <FilterDataProvider>
         <CheckParamsProvider>
           <ListProvider>
+            <Gradient isNavScrolled={isNavScrolled} />
             <Navbar isNavScrolled={isNavScrolled} />
             <Container
               component={"main"}
               maxWidth={"xxl"}
-              sx={{ marginTop: "1rem" }}
+              sx={{ paddingTop: "1rem" }}
             >
               <Routes>
                 <Route

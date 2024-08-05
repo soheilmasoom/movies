@@ -1,4 +1,4 @@
-import { memo, useContext, useState } from "react";
+import { memo, useState } from "react";
 import { useQuery } from "react-query";
 import { moviesAPI } from "../App";
 import { Box, SpeedDial, SpeedDialAction, Stack } from "@mui/material";
@@ -8,7 +8,7 @@ import MoviesSwiper from "../components/MoviesSwiper";
 import "swiper/css";
 import "swiper/css/autoplay";
 import "swiper/css/effect-coverflow";
-import { CustomTheme, DefaultTheme, ThemeContext } from "../context/Theme";
+import { themeTransition } from "../context/Theme";
 import { sortList } from "../components/Aside";
 import { ListItem } from "./Movies";
 import { useNavigate } from "react-router-dom";
@@ -28,10 +28,6 @@ const Home: React.FC<Props> = ({ isNavScrolled }) => {
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
   const navigate = useNavigate();
-
-  // Theme
-  const defaultTheme = useContext<ThemeContext>(DefaultTheme)
-    .theme as CustomTheme;
 
   // Top Movies API
   const { data, isLoading, isError } = useQuery({
@@ -64,13 +60,13 @@ const Home: React.FC<Props> = ({ isNavScrolled }) => {
 
       <Box
         sx={{
-          height: 330,
-          transform: "translateZ(0px)",
-          flexGrow: 1,
-          position: "absolute",
+          zIndex: theme => theme.zIndex.fab,
+          position: "fixed",
           right: "1rem",
           bottom: "0.5rem",
-          zIndex: 1010,
+          height: 330,
+          flexGrow: 1,
+          transform: "translateZ(0px)",
         }}
       >
         <SpeedDial
@@ -80,14 +76,14 @@ const Home: React.FC<Props> = ({ isNavScrolled }) => {
             bottom: 16,
             right: 16,
             "& button": {
-              transition: "all 0.3s ease",
+              transition: themeTransition("all", "ease"),
               width: "5rem",
               height: "5rem",
-              outline: `2px solid ${defaultTheme.palette.primary.main}`,
+              outline: theme => `2px solid ${theme.palette.primary.main}`,
               outlineOffset: "0.25rem",
             },
             "& button:hover": {
-              transition: "all 0.3s ease",
+              transition: themeTransition("all", "ease"),
             },
             "& .speed-action": {
               width: "7rem",

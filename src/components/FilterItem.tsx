@@ -1,6 +1,12 @@
 import { memo } from "react";
-import { InputLabel, MenuItem, Select, SelectChangeEvent } from "@mui/material";
+import {
+  InputLabel,
+  MenuItem,
+  Select,
+  SelectChangeEvent,
+} from "@mui/material";
 import { ListItem } from "../pages/Movies";
+import { themeRadius } from "../context/Theme";
 
 // Types
 interface Props {
@@ -41,7 +47,17 @@ const FilterItem: React.FC<Props> = ({
         {name[0].toUpperCase() + name.slice(1)}
       </InputLabel>
       <Select
-        sx={{ borderRadius: "0.5rem" }}
+        sx={{ borderRadius: themeRadius[0] }}
+        MenuProps={{
+          MenuListProps: {
+            sx: {
+              background: theme =>
+                theme.palette.mode === "light"
+                  ? theme.palette.grey[400]
+                  : theme.palette.background.paper,
+            },
+          },
+        }}
         labelId="filter-label"
         id="filter-option"
         value={searchParams ? filterReader(name) : ""}

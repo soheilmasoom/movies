@@ -3,7 +3,12 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, EffectCoverflow } from "swiper/modules";
 import { Section } from "./MuiCustoms";
 import { Box, Button, Grid, Typography, useMediaQuery } from "@mui/material";
-import { CustomTheme, DefaultTheme, ThemeContext } from "../context/Theme";
+import {
+  CustomTheme,
+  DefaultTheme,
+  ThemeContext,
+  themeGradient,
+} from "../context/Theme";
 import { useNavigate } from "react-router-dom";
 
 // Types
@@ -12,12 +17,10 @@ interface Props {
 }
 
 const MoviesSwiper: React.FC<Props> = ({ data }) => {
+  const mode = (useContext<ThemeContext>(DefaultTheme).theme as CustomTheme)
+    .palette.mode;
   const [centeredSlide, setCenteredSlide] = useState<number>(0);
-  const navigate = useNavigate()
-
-  // Theme
-  const defaultTheme = useContext<ThemeContext>(DefaultTheme)
-    .theme as CustomTheme;
+  const navigate = useNavigate();
 
   // Breakpoints
   const sm = useMediaQuery("(min-width:502px)");
@@ -26,39 +29,38 @@ const MoviesSwiper: React.FC<Props> = ({ data }) => {
     <Box
       sx={{
         backgroundImage: `url("https://image.tmdb.org/t/p/w600_and_h900_bestv2/${data[centeredSlide]?.poster_path}")`,
+        backgroundPositionY: "20%",
         overflow: "hidden",
       }}
     >
       <Box
         sx={{
-          background:
-            defaultTheme.palette.mode === "dark"
-              ? "linear-gradient(to top , rgba(18,18,18,1) 20%, rgba(18,18,18,0))"
-              : "linear-gradient(to top , rgba(184, 189, 181, 1) 20%, rgba(184, 189, 181, 0))",
+          background: (theme) =>
+            theme.palette.mode === "dark"
+              ? themeGradient.banner.dark
+              : themeGradient.banner.light,
         }}
       >
         <Section
           backgroundColor={
-            defaultTheme.palette.mode === "dark"
-              ? "rgba(18,18,18,0.7)"
-              : "rgba(184, 189, 181, 0.2)"
+            mode === "dark" ? "rgba(26,27,31,0.7)" : "rgba(255,255,255,0.2)"
           }
         >
           {data && (
             <Grid item xs={12}>
               <Button
-                onClick={()=>navigate(`/movies/${data[centeredSlide].id}`)}
+                onClick={() => navigate(`/movies/${data[centeredSlide].id}`)}
                 sx={{
+                  color: (theme) => theme.palette.text.primary,
                   display: "block !important",
-                  width: '100%',
-                  color: defaultTheme.palette.text.primary,
+                  width: "100%",
                 }}
               >
                 <Typography
                   variant="h4"
                   fontWeight={700}
                   textAlign={"center"}
-                  sx={{ paddingX: "1rem" }}
+                  sx={{ paddingX: "1rem", textShadow: theme => `-2px 2px 2px ${theme.palette.background.default}` }}
                 >
                   {data[centeredSlide].original_title}
                   <span

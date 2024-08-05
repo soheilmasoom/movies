@@ -9,7 +9,7 @@ import { moviesAPI } from "../App";
 // Components
 import MovieCard from "./MovieCard";
 import MovieSkeleton from "./MovieSkeleton";
-import { AddAlert, Loader } from "./MuiCustoms";
+import { AddAlert, getCenter, Loader } from "./MuiCustoms";
 import ErrorPage from "../pages/ErrorPage";
 
 // Types
@@ -96,7 +96,7 @@ const MoviesList: React.FC<Props> = ({ genresTable }) => {
                   md={4}
                   xl={3}
                   key={idx}
-                  sx={{ display: "flex", justifyContent: "center" }}
+                  sx={getCenter.flex}
                 >
                   <MovieCard
                     item={item}
