@@ -9,11 +9,10 @@ import {
   CardMedia,
   Checkbox,
   IconButton,
-  Tooltip,
   Typography,
-  Zoom,
 } from "@mui/material";
 import { BsCardChecklist, BsSuitHeart, BsSuitHeartFill } from "react-icons/bs";
+import defaultPoster from "../assets/images/default-poster.jpg"
 
 // Components
 import { Movie, GenresList } from "../pages/Movies";
@@ -34,7 +33,7 @@ const MovieCard: React.FC<Props> = ({
   RemoveFromList,
 }) => {
   const rateValue = item.vote_average;
-  const genreLabels = item.genre_ids.slice(0, 2);
+  const genreLabels = item.genre_ids ? item.genre_ids.slice(0, 2) : [];
   const { favlist, addToFavContext, addToWatchContext, deleteFromFavContext } =
     useContext<ListTypes>(List);
   const [isFav, setIsFav] = useState<boolean>(false);
@@ -64,6 +63,11 @@ const MovieCard: React.FC<Props> = ({
             "https://image.tmdb.org/t/p/w600_and_h900_bestv2/" +
             item.poster_path
           }
+          onError={(event) => {
+            if (event.type === "error") {
+              event.currentTarget.src = defaultPoster
+            }
+          }}
           alt={item.original_title}
         />
 
@@ -110,7 +114,7 @@ const MovieCard: React.FC<Props> = ({
               );
             })
           ) : (
-            <GenreLabel label={"No Genre"} variant="outlined" />
+            <GenreLabel label={"No Genres"} variant="outlined" />
           )}
         </Box>
       </CardContent>

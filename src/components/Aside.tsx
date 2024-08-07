@@ -1,4 +1,4 @@
-import { memo, useContext, useReducer } from "react";
+import React, { memo, useContext, useReducer } from "react";
 import {
   Button,
   Divider,
@@ -15,6 +15,7 @@ import FilterItem from "./FilterItem";
 import DateFilterItem from "./DateFilterItem";
 import RateFilterItem from "./RateFilterItem";
 import { Accord, OptionsDivider, Sidebar } from "./MuiCustoms";
+import { useNavigate } from "react-router-dom";
 
 // Sort List
 export const sortList: ListItem[] = [
@@ -28,13 +29,19 @@ export const sortList: ListItem[] = [
   { id: "average_vote.desc", name: "Vote Rate Descending" },
 ];
 
-const Aside = () => {
+// Types
+interface AsideProps {
+  closeMenu?: () => void
+}
+
+const Aside: React.FC<AsideProps> = ({closeMenu}) => {
   const params = useContext<CheckParamsType>(CheckParams);
   const [reducerState, dispatch] = useReducer(
     filterOptionsReducer,
     filterOptions
   );
   const filterData = useContext<FilterDataType>(FilterData)
+  const navigate = useNavigate()
   
 
   // Filter Method
@@ -58,7 +65,11 @@ const Aside = () => {
       <FormControl fullWidth>
         <FilterItem
           name="sort"
-          handleChange={handleChange}
+          handleChange={(e) => {
+            handleChange(e)
+            closeMenu && closeMenu()
+            navigate("/movies")
+          }}
           filterOptionsList={sortList}
         />
       </FormControl>
@@ -67,7 +78,11 @@ const Aside = () => {
       <FormControl fullWidth>
         <FilterItem
           name="genre"
-          handleChange={handleChange}
+          handleChange={(e) => {
+            handleChange(e)
+            closeMenu && closeMenu()
+            navigate("/movies")
+          }}
           filterOptionsList={filterData.genreList}
         />
       </FormControl>
@@ -100,6 +115,8 @@ const Aside = () => {
           onClick={() => {
             localStorage.setItem("filterOptions", JSON.stringify(reducerState));
             params?.changeCheckFilter();
+            closeMenu && closeMenu()
+            navigate("/movies")
           }}
         >
           Filter

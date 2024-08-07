@@ -9,7 +9,6 @@ import {
   ArticleBox,
   CastCard,
   getCenter,
-  Loader,
   RecomCard,
   Section,
 } from "../components/MuiCustoms";
@@ -24,7 +23,10 @@ interface Props {
   isNavScrolled: boolean;
 }
 
-const Info: React.FC<Props> = ({ isNavScrolled }) => {
+const Info = () => {
+  const sessionID = localStorage.getItem("session_id") as string;
+  const accountID = localStorage.getItem("account_id") as string;
+
   // Page Param
   const param = useLocation();
   const pageParam = useMemo(() => {
@@ -72,6 +74,32 @@ const Info: React.FC<Props> = ({ isNavScrolled }) => {
       return res?.data.results;
     },
   });
+  const { data: rateData } = useQuery({
+    queryKey: ["rateValue"],
+    queryFn: async () => {
+      const res = await moviesAPI.get(
+        `https://api.themoviedb.org/3/account/${accountID}/rated/movies?session_id=${sessionID}`
+      );
+      return res?.data.results;
+    },
+    enabled: Boolean(sessionID),
+  });
+
+  // Initial Rate Value
+  const movieRate = () => {
+    const output = {
+      rate: 2.5,
+      isRated: false,
+    };
+    rateData &&
+      rateData.find((item: any) => {
+        if (item.id === detailData.id) {
+          output.rate = item.rating;
+          output.isRated = true;
+        }
+      });
+    return output;
+  };
 
   // Movie Refetch
   useEffect(() => {
@@ -95,7 +123,9 @@ const Info: React.FC<Props> = ({ isNavScrolled }) => {
 
   if (castData && detailData && recomData)
     return (
-      <Stack sx={isNavScrolled ? { marginTop: "50px" } : {}}>
+      <Stack 
+      // sx={isNavScrolled ? { marginTop: "50px" } : {}}
+      >
         {/* Info Banner */}
         <Box
           id="info_banner"
@@ -109,14 +139,22 @@ const Info: React.FC<Props> = ({ isNavScrolled }) => {
               mode === "dark" ? "rgba(26,27,31,0.7)" : "rgba(255,255,255,0.7)"
             }
           >
-            <InfoCard detail={detailData} cast={castData} />
+            <InfoCard
+              detail={detailData}
+              cast={castData}
+              movieRate={movieRate}
+            />
           </Section>
         </Box>
 
         {/* Cast List */}
         <Section>
           <ArticleBox title="cast" xs={12}>
-          {castData.cast.length === 0 && <Typography sx={{...getCenter.static}}>No Casts Found!</Typography>}
+            {castData.cast.length === 0 && (
+              <Typography sx={{ ...getCenter.static }}>
+                No Casts Found!
+              </Typography>
+            )}
             <Swiper
               slidesPerView={xl ? 6 : lg ? 5 : md ? 4 : sm ? 3 : 2}
               grabCursor={true}
@@ -135,7 +173,11 @@ const Info: React.FC<Props> = ({ isNavScrolled }) => {
         {/* Recommendation List */}
         <Section>
           <ArticleBox title="Recommendations" xs={12}>
-            {recomData.length === 0 && <Typography sx={{...getCenter.static}}>No Recommendations Found!</Typography>}
+            {recomData.length === 0 && (
+              <Typography sx={{ ...getCenter.static }}>
+                No Recommendations Found!
+              </Typography>
+            )}
             <Swiper
               slidesPerView={xl ? 6 : lg ? 5 : md ? 4 : sm ? 3 : 2}
               grabCursor={true}

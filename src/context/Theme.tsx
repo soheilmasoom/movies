@@ -160,7 +160,7 @@ export const ThemeProvide: React.FC<Props> = ({ children }) => {
                 display: "none",
               },
               "*::-webkit-scrollbar-thumb": {
-                backgroundColor: darkMode ? "#434343" : "#8d8e90",
+                backgroundColor: darkMode ? "#616161" : "#8d8e90",
                 height: "8px",
                 borderRadius: "8px",
               },

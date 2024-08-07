@@ -1,4 +1,3 @@
-import { useState } from "react";
 import axios from "axios";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { Navigate, Route, Routes } from "react-router-dom";
@@ -41,41 +40,31 @@ const client = new QueryClient({
 });
 
 function App() {
-  const [isNavScrolled, setIsNavScrolled] = useState<boolean>(false);
-
-  // Nav Scroll Check
-  document.addEventListener("scroll", () => {
-    if (window.pageYOffset > 60) {
-      setIsNavScrolled(true);
-    } else {
-      setIsNavScrolled(false);
-    }
-  });
 
   return (
     <QueryClientProvider client={client}>
       <FilterDataProvider>
         <CheckParamsProvider>
           <ListProvider>
-            <Gradient isNavScrolled={isNavScrolled} />
-            <Navbar isNavScrolled={isNavScrolled} />
+            <Gradient />
+            <Navbar />
             <Container
               component={"main"}
               maxWidth={"xxl"}
-              sx={{ paddingTop: "1rem" }}
+              sx={{ paddingTop: "1rem", marginTop: "3.5rem" }}
             >
               <Routes>
                 <Route
                   path="/"
-                  element={<Home isNavScrolled={isNavScrolled} />}
+                  element={<Home />}
                 />
                 <Route
                   path="/movies"
-                  element={<Movies isNavScrolled={isNavScrolled} />}
+                  element={<Movies />}
                 />
                 <Route
                   path="/movies/:id"
-                  element={<Info isNavScrolled={isNavScrolled} />}
+                  element={<Info />}
                 />
                 <Route path="/signup" element={<SignUp />} />
                 <Route path="/login" element={<LogIn />} />

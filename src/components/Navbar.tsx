@@ -4,7 +4,6 @@ import {
   Box,
   Button,
   Checkbox,
-  createStyles,
   Divider,
   Drawer,
   IconButton,
@@ -13,9 +12,7 @@ import {
 } from "@mui/material";
 import { BsList, BsSunFill, BsX } from "react-icons/bs";
 import {
-  CustomTheme,
   DefaultTheme,
-  themeBorder,
   ThemeContext,
   themeGradient,
   themeTransition,
@@ -26,17 +23,12 @@ import { useQuery } from "react-query";
 import { useNavigate } from "react-router-dom";
 
 // Components
-import { AccountMenu, getCenter, Nav } from "./MuiCustoms";
+import { AccountMenu, getCenter, Nav, navScroll } from "./MuiCustoms";
 import SearchMovie from "./SearchMovie";
 import Aside from "./Aside";
 import UserList from "./UserList";
 
-// Types
-interface Props {
-  isNavScrolled: boolean;
-}
-
-const Navbar: React.FC<Props> = ({ isNavScrolled }) => {
+const Navbar = () => {
   const [drawer, toggleDrawer] = useState<boolean>(false);
   const [accountMenu, setAccountMenu] = useState<null | HTMLElement>(null);
   const [openUserList, setOpenUserList] = useState<
@@ -44,6 +36,16 @@ const Navbar: React.FC<Props> = ({ isNavScrolled }) => {
   >(false);
   const toggleAccountMenu = Boolean(accountMenu);
   const navigate = useNavigate();
+
+  // Nav Scroll Check
+  const [isNavScrolled, setIsNavScrolled] = useState<boolean>(false);
+  document.addEventListener("scroll", () => {
+    if (window.pageYOffset > 60) {
+      setIsNavScrolled(true);
+    } else {
+      setIsNavScrolled(false);
+    }
+  });
 
   // Mode Toggle Context
   const { checkMode } = useContext<ThemeContext>(DefaultTheme);
@@ -58,32 +60,13 @@ const Navbar: React.FC<Props> = ({ isNavScrolled }) => {
   const showMenuSearch = useMediaQuery("(max-width:768px)");
   const showUserButton = useMediaQuery("(max-width:480px)");
 
-  // NavScrolled Styles
-  const styles = createStyles({
-    "@keyframes showNav": {
-      "0%": {
-        height: "0"
-      },
-      "100%": {
-        height: "3.5rem"
-      }
-    },
-    background: (theme: CustomTheme) => theme.palette.secondary.main,
-    zIndex: (theme: CustomTheme) => theme.zIndex.mobileStepper,
-    position: "fixed",
-    width: "100%",
-    top: 0,
-    borderBottom: themeBorder[0],
-    borderColor: "divider",
-    transition: `${themeTransition("position", "ease")}, ${themeTransition(
-      "background",
-      "ease"
-    )}`,
-    animation: "showNav 0.1s linear",
-  });
-
   // Mui Props
   const label = { inputProps: { "aria-label": "Darkmode Checkbox" } };
+
+  // Close Fn
+  const closeMenu = () => {
+    toggleDrawer(false);
+  };
 
   // isLogged Fn
   const session = useMemo(() => {
@@ -115,7 +98,7 @@ const Navbar: React.FC<Props> = ({ isNavScrolled }) => {
             ? {
                 background: (theme) => theme.palette.secondary.main,
               }
-            : styles
+            : navScroll
         }
       >
         {/* Webpage Title */}
@@ -265,12 +248,26 @@ const Navbar: React.FC<Props> = ({ isNavScrolled }) => {
             </Button>
           )}
         </Box>
+
+        {/* Divider */}
+      {!isNavScrolled && (
+        <Divider
+          sx={{
+            width: (theme) => (theme.palette.mode === "dark" ? "95%" : "100%"),
+            marginX: "auto",
+            position: "absolute",
+            bottom: 0
+          }}
+        />
+      )}
       </Nav>
+
+      
 
       {/* Navbar Menu */}
       <Drawer
         open={drawer}
-        onClose={() => toggleDrawer(false)}
+        onClose={closeMenu}
         sx={{
           "& .MuiDrawer-paper": {
             width: md ? "30vw" : sm ? "50vw" : "100vw",
@@ -304,7 +301,7 @@ const Navbar: React.FC<Props> = ({ isNavScrolled }) => {
               JSON.parse(localStorage.getItem("theme") as string)?.darkMode
             }
             onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-              theme.checkMode(event.target.checked);
+              checkMode(event.target.checked);
               localStorage.setItem(
                 "theme",
                 JSON.stringify({ darkMode: event.target.checked })
@@ -329,7 +326,7 @@ const Navbar: React.FC<Props> = ({ isNavScrolled }) => {
           />
           <IconButton
             disableRipple
-            onClick={() => toggleDrawer(false)}
+            onClick={closeMenu}
             sx={{
               padding: 0,
               marginRight: "-0.5rem",
@@ -367,7 +364,7 @@ const Navbar: React.FC<Props> = ({ isNavScrolled }) => {
         )}
 
         {/* Menu FilterOptions */}
-        <Aside />
+        <Aside closeMenu={closeMenu} />
       </Drawer>
 
       {/* Dashboard & Watchlist */}

@@ -23,7 +23,7 @@ interface Props {
 // SpeedDial Actions
 const actions = ["Vote Rate", "Release", "Title", "Trends"];
 
-const Home: React.FC<Props> = ({ isNavScrolled }) => {
+const Home = () => {
   const [open, setOpen] = useState<boolean>(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -55,12 +55,14 @@ const Home: React.FC<Props> = ({ isNavScrolled }) => {
   if (isError) return <ErrorPage error={"Error! Please Try Later"} />;
 
   return (
-    <Stack sx={isNavScrolled ? { marginTop: "50px" } : {}}>
+    <Stack
+    //  sx={isNavScrolled ? { marginTop: "50px" } : {}}
+     >
       {data && <MoviesSwiper data={data}></MoviesSwiper>}
 
       <Box
         sx={{
-          zIndex: theme => theme.zIndex.fab,
+          zIndex: (theme) => theme.zIndex.fab,
           position: "fixed",
           right: "1rem",
           bottom: "0.5rem",
@@ -79,7 +81,7 @@ const Home: React.FC<Props> = ({ isNavScrolled }) => {
               transition: themeTransition("all", "ease"),
               width: "5rem",
               height: "5rem",
-              outline: theme => `2px solid ${theme.palette.primary.main}`,
+              outline: (theme) => `2px solid ${theme.palette.primary.main}`,
               outlineOffset: "0.25rem",
             },
             "& button:hover": {
@@ -99,7 +101,12 @@ const Home: React.FC<Props> = ({ isNavScrolled }) => {
             <SpeedDialAction
               key={action}
               icon={action}
-              onClick={(e) => handleClick(e.target.childNodes[0].data)}
+              onClick={({ target }) => {
+                handleClick(
+                  (target as EventTarget & { childNodes: [{ data: string }] })
+                    .childNodes[0].data
+                );
+              }}
               className="speed-action"
             />
           ))}

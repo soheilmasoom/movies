@@ -54,6 +54,8 @@ import { CheckAccount, CheckAccountType } from "../context/CheckAccount";
 import { useNavigate } from "react-router-dom";
 import { BiSolidLogOut } from "react-icons/bi";
 import { Variant } from "@mui/material/styles/createTypography";
+import defaultPoster from "../assets/images/default-poster.jpg";
+import defaultAvatar from "../assets/images/avatar.png";
 
 // Types
 interface SectionProps {
@@ -71,12 +73,9 @@ interface ArticleBoxProps {
   xxl?: number;
   children: ReactNode;
 }
-interface GradientProps {
-  isNavScrolled: boolean;
-}
 interface AddAlertProps {
   openSnack: boolean;
-  setOpenSnack: () => void;
+  closeSnack: () => void;
   cancelAdding: () => void;
 }
 interface TextSlideProps {
@@ -200,13 +199,13 @@ export const ArticleBox: React.FC<ArticleBoxProps> = ({
   );
 };
 
-export const Gradient: React.FC<GradientProps> = ({ isNavScrolled }) => {
+export const Gradient = () => {
   return (
     <Box
       sx={{
-        position: isNavScrolled ? "fixed" : "absolute",
+        position: "fixed",
         zIndex: -1,
-        bottom: 0,
+        top: 0,
         width: "100%",
         height: "calc(100% - 3.5rem)",
         background: (theme) =>
@@ -215,15 +214,6 @@ export const Gradient: React.FC<GradientProps> = ({ isNavScrolled }) => {
             : themeGradient.back.dark,
       }}
     >
-      {/* Divider */}
-      {!isNavScrolled && (
-        <Divider
-          sx={{
-            width: (theme) => (theme.palette.mode === "dark" ? "95%" : "100%"),
-            marginX: "auto",
-          }}
-        />
-      )}
     </Box>
   );
 };
@@ -290,32 +280,34 @@ export const TextSlide: React.FC<TextSlideProps> = ({
 
 export const AddAlert: React.FC<AddAlertProps> = ({
   openSnack,
-  setOpenSnack,
+  closeSnack,
   cancelAdding,
 }) => {
-  const [progress, setProgress] = useState(0);
+  // const [progress, setProgress] = useState(0);
 
-  // Timer Interval
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setProgress((prevProgress) =>
-        prevProgress >= 100 ? 0 : prevProgress + 3
-      );
-    }, 10);
+  // // Timer Interval
+  // useEffect(() => {
+  //   if (openSnack) {
+  //     const timer = setInterval(() => {
+  //       setProgress((prevProgress) =>
+  //         prevProgress >= 100 ? 0 : prevProgress + 3
+  //       );
+  //     }, 10);
 
-    return () => {
-      clearInterval(timer);
-    };
-  }, []);
+  //     return () => {
+  //       clearInterval(timer);
+  //     };
+  //   }
+  // }, []);
 
   // Alert Actions
   const action = (
     <Box sx={{ width: "2.5rem", height: "2.5rem", position: "relative" }}>
-      <CircularProgress
+      {/* <CircularProgress
         variant="determinate"
         value={progress}
         sx={{ position: "absolute" }}
-      />
+      /> */}
       <IconButton
         size="small"
         aria-label="close"
@@ -323,7 +315,12 @@ export const AddAlert: React.FC<AddAlertProps> = ({
         sx={{
           ...getCenter.static,
         }}
-        onClick={cancelAdding}
+        onClick={() => {
+          cancelAdding();
+          setTimeout(() => {
+            closeSnack();
+          }, 500);
+        }}
       >
         <BsX />
       </IconButton>
@@ -334,7 +331,7 @@ export const AddAlert: React.FC<AddAlertProps> = ({
     <Snackbar
       open={openSnack}
       autoHideDuration={3000}
-      onClose={setOpenSnack}
+      onClose={closeSnack}
       message="Movie Added"
       sx={{
         "& .MuiSnackbarContent-message": {
@@ -348,11 +345,38 @@ export const AddAlert: React.FC<AddAlertProps> = ({
 
 // Navbar Components
 export const Nav = styled("nav")({
+  position: "absolute",
+  top: 0,
+  zIndex: 1000,
+  width: "100%",
+  height: "3.5rem",
+  padding: "0 1.5rem",
   display: "flex",
   justifyContent: "space-between",
   alignItems: "center",
-  padding: "0 1.5rem",
-  height: "3.5rem",
+});
+
+// NavScrolled Styles
+export const navScroll = createStyles({
+  "@keyframes showNav": {
+    "0%": {
+      height: "0",
+    },
+    "100%": {
+      height: "3.5rem",
+    },
+  },
+  background: (theme: any) => theme.palette.secondary.main,
+  position: "fixed",
+  width: "100%",
+  top: 0,
+  borderBottom: themeBorder[0],
+  borderColor: "divider",
+  transition: `${themeTransition("position", "ease")}, ${themeTransition(
+    "background",
+    "ease"
+  )}`,
+  animation: "showNav 0.1s linear",
 });
 
 export const SearchMovieOptions: React.FC<SearchMovieOptionsProps> = ({
@@ -777,10 +801,18 @@ export const CastCard: React.FC<CastCardProps> = ({ item }) => {
         borderRadius: themeRadius[1],
       }}
     >
+      {/* Card Poster */}
       <CardMedia
         component={"img"}
         image={`https://image.tmdb.org/t/p/w600_and_h900_bestv2/${item?.profile_path}`}
+        onError={(event) => {
+          if (event.type === "error") {
+            event.currentTarget.src = defaultAvatar;
+          }
+        }}
       ></CardMedia>
+
+      {/* Card Info */}
       <CardContent
         sx={{
           backgroundColor: (theme) => theme.palette.grey[900],
@@ -825,6 +857,11 @@ export const RecomCard: React.FC<CastCardProps> = ({ item }) => {
       <CardMedia
         component={"img"}
         image={`https://image.tmdb.org/t/p/w600_and_h900_bestv2/${item?.poster_path}`}
+        onError={(event) => {
+          if (event.type === "error") {
+            event.currentTarget.src = defaultPoster;
+          }
+        }}
       ></CardMedia>
 
       {/* Card Content */}

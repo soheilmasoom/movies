@@ -1,7 +1,8 @@
-import { useContext, useEffect, useMemo, useRef } from "react";
+import { memo, useContext, useEffect, useMemo, useRef } from "react";
 import { useInfiniteQuery } from "react-query";
 import { Grid } from "@mui/material";
 import { CheckParams, CheckParamsType } from "../context/CheckParams";
+import { CheckAccount, CheckAccountType } from "../context/CheckAccount";
 import { useUserlist } from "../hooks/useUserlist";
 import { GenresList, Movie } from "../pages/Movies";
 import { moviesAPI } from "../App";
@@ -18,6 +19,7 @@ interface Props {
 }
 
 const MoviesList: React.FC<Props> = ({ genresTable }) => {
+  const {apiKey, authCode} = useContext<CheckAccountType>(CheckAccount);
   const params = useContext<CheckParamsType>(CheckParams);
   const searchParams = useMemo(() => {
     return localStorage.getItem("filterOptions")
@@ -74,7 +76,7 @@ const MoviesList: React.FC<Props> = ({ genresTable }) => {
     cancelListUpdate,
     openSnack,
     setOpenSnack,
-  } = useUserlist();
+  } = useUserlist({api_key: apiKey, Authorization: authCode});
 
   // // API Client Management
   if (isError) return <ErrorPage error={"Error! Please Try Later"} />;
@@ -119,7 +121,7 @@ const MoviesList: React.FC<Props> = ({ genresTable }) => {
       {/* Snackbar */}
       <AddAlert
         openSnack={openSnack}
-        setOpenSnack={() => setOpenSnack(false)}
+        closeSnack={() => setOpenSnack(false)}
         cancelAdding={() => {
           cancelListUpdate.current && cancelListUpdate.current();
         }}
@@ -128,4 +130,4 @@ const MoviesList: React.FC<Props> = ({ genresTable }) => {
   );
 };
 
-export default MoviesList;
+export default memo(MoviesList);

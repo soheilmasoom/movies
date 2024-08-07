@@ -15,6 +15,7 @@ import { themeBorder } from "../context/Theme";
 import { AddAlert } from "./MuiCustoms";
 import { useUserlist } from "../hooks/useUserlist";
 import { List } from "../context/List";
+import { CheckAccount, CheckAccountType } from "../context/CheckAccount";
 
 // Types
 interface UserListProps {
@@ -33,6 +34,7 @@ const Transition = forwardRef(function Transition(
 });
 
 const UserList: React.FC<UserListProps> = ({ openUserList, closeUserList }) => {
+  const {apiKey, authCode} = useContext<CheckAccountType>(CheckAccount);
   const { watchlist, favlist, deleteFromFavContext, deleteFromWatchContext } =
     useContext(List);
   const navigate = useNavigate();
@@ -49,7 +51,7 @@ const UserList: React.FC<UserListProps> = ({ openUserList, closeUserList }) => {
 
   // Userlist Hook
   const { RemoveFromList, cancelListUpdate, openSnack, setOpenSnack } =
-    useUserlist();
+  useUserlist({api_key: apiKey, Authorization: authCode});
 
   return (
     <>
@@ -128,7 +130,7 @@ const UserList: React.FC<UserListProps> = ({ openUserList, closeUserList }) => {
       {/* Snackbar */}
       <AddAlert
         openSnack={openSnack}
-        setOpenSnack={() => setOpenSnack(false)}
+        closeSnack={() => setOpenSnack(false)}
         cancelAdding={() => {
           cancelListUpdate.current && cancelListUpdate.current();
         }}

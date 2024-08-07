@@ -1,4 +1,4 @@
-import { useContext, useMemo, useState } from "react";
+import { memo, useContext, useMemo, useState } from "react";
 import { Grid, useMediaQuery } from "@mui/material";
 import { FilterData } from "../context/MoviesData";
 
@@ -8,9 +8,6 @@ import Aside from "../components/Aside";
 
 // Types
 export type GenresList = Record<string, string>;
-interface Props {
-  isNavScrolled: boolean
-}
 export interface Movie {
   adult: boolean;
   poster_path: string;
@@ -27,7 +24,7 @@ export interface ListItem {
   name: string;
 }
 
-const Movies: React.FC<Props> = ({ isNavScrolled }) => {
+const Movies = () => {
   const [genresTable, setGenresTable] = useState<GenresList>({});
   const genreList: ListItem[] = useContext(FilterData).genreList
 
@@ -46,7 +43,7 @@ const Movies: React.FC<Props> = ({ isNavScrolled }) => {
   }, [genreList]);
 
   return ( 
-      <Grid container spacing={3} sx={isNavScrolled ? {marginTop: "50px"} : {}}>
+      <Grid container spacing={3}>
         <Grid item component={"aside"} xs={0} lg={2.5}>
           {lg && <Aside />}
         </Grid>
@@ -57,4 +54,4 @@ const Movies: React.FC<Props> = ({ isNavScrolled }) => {
   );
 };
 
-export default Movies;
+export default memo(Movies);

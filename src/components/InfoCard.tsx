@@ -16,11 +16,16 @@ import { BsCardChecklist, BsSuitHeart, BsSuitHeartFill } from "react-icons/bs";
 import { useContext, useEffect, useState } from "react";
 import { List, ListTypes } from "../context/List";
 import { useUserlist } from "../hooks/useUserlist";
+import { useMutation } from "react-query";
+import { moviesAPI } from "../App";
+import defaultPoster from "../assets/images/default-poster.jpg"
+import { CheckAccount, CheckAccountType } from "../context/CheckAccount";
 
 // Types
 interface Props {
   detail: any;
   cast: any;
+  movieRate: () => { rate: number; isRated: boolean };
 }
 
 // Styles
@@ -30,7 +35,9 @@ const movieInfo: Record<string, string | number> = createStyles({
   gap: 2,
 });
 
-const InfoCard: React.FC<Props> = ({ detail, cast }) => {
+const InfoCard: React.FC<Props> = ({ detail, cast, movieRate }) => {
+  const sessionID = localStorage.getItem("session_id") as string;
+  const {apiKey, authCode} = useContext<CheckAccountType>(CheckAccount);
   const { favlist, addToFavContext, addToWatchContext, deleteFromFavContext } =
     useContext<ListTypes>(List);
 
@@ -48,7 +55,28 @@ const InfoCard: React.FC<Props> = ({ detail, cast }) => {
     cancelListUpdate,
     openSnack,
     setOpenSnack,
-  } = useUserlist();
+  } = useUserlist({api_key: apiKey, Authorization: authCode});
+
+  // Rate API
+  const { mutate } = useMutation({
+    mutationKey: ["rateMovie"],
+    mutationFn: async (payload: string[]) => {
+      return await moviesAPI.post(
+        `3/movie/${payload[0]}/rating${
+          sessionID ? `?session_id=${sessionID}` : ""
+        }`,
+        { value: Number(payload[1]) * 2 },
+        {
+          params: {
+            api_key: apiKey
+          },
+          headers: {
+            Authorization: authCode
+          }
+        }
+      );
+    },
+  });
 
   // Mediaqueries
   const sm = useMediaQuery("(min-width:480px)");
@@ -104,6 +132,11 @@ const InfoCard: React.FC<Props> = ({ detail, cast }) => {
         <Box
           component={"img"}
           src={`https://image.tmdb.org/t/p/w600_and_h900_bestv2/${detail?.poster_path}`}
+          onError={(event) => {
+            if (event.type === "error") {
+              event.currentTarget.src = defaultPoster
+            }
+          }}
           height="100%"
           width="100%"
           sx={{ objectFit: "contain" }}
@@ -268,9 +301,12 @@ const InfoCard: React.FC<Props> = ({ detail, cast }) => {
           <Box sx={{ ...getCenter.flex, gap: 3 }}>
             <Rating
               name="size-large"
-              defaultValue={2.5}
+              defaultValue={movieRate().rate}
               precision={0.5}
               size="large"
+              onChange={(_, newVal) => {
+                mutate([detail?.id, newVal]);
+              }}
             />
             <Rate value={detail?.vote_average * 10} position="relative" />
           </Box>
@@ -341,7 +377,7 @@ const InfoCard: React.FC<Props> = ({ detail, cast }) => {
       {/* Snackbar */}
       <AddAlert
         openSnack={openSnack}
-        setOpenSnack={() => setOpenSnack(false)}
+        closeSnack={() => setOpenSnack(false)}
         cancelAdding={() => {
           cancelListUpdate.current && cancelListUpdate.current();
         }}

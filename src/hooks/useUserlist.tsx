@@ -9,8 +9,12 @@ interface Data {
   watchlist?: boolean;
   favorite?: boolean;
 }
+interface UserlistParams {
+  api_key: string
+  Authorization: string
+}
 
-export function useUserlist() {
+export function useUserlist({api_key, Authorization}: UserlistParams) {
   const [openSnack, setOpenSnack] = useState<boolean>(false);
   const cancelListUpdate = useRef<() => void | null>();
 
@@ -20,11 +24,19 @@ export function useUserlist() {
 
   // UserList API Req
   const { mutate } = useMutation({
-    mutationKey: ["addFav"],
+    mutationKey: ["addList"],
     mutationFn: async (params: [Data, string]) => {
       return await moviesAPI.post(
         `3/account/${accountID}/${params[1]}`,
-        params[0]
+        params[0],
+        {
+          params: {
+            api_key,
+          },
+          headers: {
+            Authorization,
+          } 
+        }
       );
     },
   });
