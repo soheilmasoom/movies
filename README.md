@@ -1,30 +1,53 @@
-# React + TypeScript + Vite
+# Movies Project
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Movies Project is an online social cataloging service, based on TMDB database. This application allows the users registered on TMDB to preview, rate and create lists of movies.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+**⚡️ Single Page Application**
 
-## Expanding the ESLint configuration
+**⚡️ Modern UI Design**
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+**⚡️ Fully Responsive**
 
-- Configure the top-level `parserOptions` property like this:
+**⚡️ Multi-Page Layout**
 
-```js
-export default {
-  // other rules...
-  parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
-    tsconfigRootDir: __dirname,
-  },
-}
+
+## Technologies
+
+This project was built using these technologies:
+
+- HTML5, CSS3
+- React.js
+- Material UI
+- React Query
+- React Hook Form
+
+
+## Getting Started
+
+Clone down this repository. You will need `node.js`, `npm` and `git` installed globally on your machine.
+
+```
+node@v22.6.0 or higher
+npm@10.8.2 or higher
+git@2.46.0 or higher
 ```
 
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+```bash
+# Clone the repository
+$ git clone https://github.com/soheilmasoom/movies.git
+
+# Move into the repository
+$ cd movies
+```
+
+After that, you can install the dependencies and luanch the development server.
+
+```bash
+# Install dependencies
+$ npm install
+
+# Start the development server
+$ npm run dev
+```
